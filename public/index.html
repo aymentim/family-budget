@@ -803,7 +803,8 @@ function setupCard(){
 function homeView(){
   const res=reservoir(S), fs=fullShare(S), cov=fs?res/fs:0, mode=modeFor(S,res), st=stats(S,S.month), set=S.settings;
   const plannedTotal=sum3(st.planned);
-  let h=header('ميزانية العائلة');
+  const hr=new Date().getHours(), meI=LIVE?getMe():null, meName=meI!=null?S.settings.members[meI]:'';
+  let h=header((hr<12?'صباح الخير':'مساء الخير')+(meName?'، '+esc(meName):''));
   if(LIVE&&S.started===false)return h+setupCard();
   if(S.isSample)h+=`<div class="banner info">${ICON.info}<div><p>الأرقام هنا أمثلة عشان تجرّب. سجّل عمليات، شوف تبويب الخطة، وانتقل للشهر الجاي. تمسحها من الإعدادات.</p></div></div>`;
   h+=banner(mode,cov);
