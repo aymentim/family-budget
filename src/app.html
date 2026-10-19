@@ -4,30 +4,39 @@
 <style>
 /* Layout: one phone-width column, bottom nav with a center add button, bottom sheet for entries */
 :root{
-  --bg:#F2F4F1;--surface:#FFFFFF;--surface-2:#E8ECE9;--line:#E1E7E3;--fg:#17211D;--muted:#56635D;
-  --accent:#0F5E52;--on-accent:#FFFFFF;--accent-soft:#DDF0EA;--accent-soft-fg:#0A4038;
-  --l-ess:#0F5E52;--l-imp:#3E9C8A;--l-flex:#9FD3C7;
-  --hero:#0F5E52;--hero-fg:#FFFFFF;--hero-sub:#CDE9E1;--hero-warn:#8A4B12;--hero-warn-sub:#F6DCC2;
-  --warn-bg:#FBEBD9;--warn-fg:#7A3F0C;--danger:#B42318;--danger-bg:#FCE7E4;--backdrop:rgba(10,20,17,.45);
-  --c-exp:#007E5C;--c-cons:#3A7FD0;--c-none:#C2570A;--band-safe:rgba(15,94,82,.10);--band-low:rgba(194,87,10,.10);--grid:#E3E8E5;--env-flap:#CFDAD4;
+  --bg:#F4F6FB;--surface:#FFFFFF;--surface-2:#E9EDF5;--line:#E0E5EF;--fg:#161B2E;--muted:#5A6378;
+  --accent:#1F5FD1;--on-accent:#FFFFFF;--accent-soft:#E4ECFD;--accent-soft-fg:#163E99;
+  --l-ess:#1F5FD1;--l-imp:#8B5CF6;--l-flex:#F26B3A;
+  --hero:#1F5FD1;--hero-fg:#FFFFFF;--hero-sub:#D9E4FB;--hero-warn:#C2410C;--hero-warn-sub:#FFE3D4;
+  --warn-bg:#FFF0DB;--warn-fg:#8A4100;--danger:#C81E3A;--danger-bg:#FDE6EA;--backdrop:rgba(14,20,40,.45);
+  --pos:#0E8A5F;--pos-soft:#DDF5EA;--pos-soft-fg:#0A5E41;
+  --c-house:#F26B3A;--c-house-soft:#FFE8DE;--c-house-fg:#A3380F;
+  --c-goal:#E3A008;--c-goal-soft:#FFF4D6;--c-goal-fg:#7A5300;--c-week:#12A37A;
+  --c-exp:#007E5C;--c-cons:#3A7FD0;--c-none:#C2570A;--band-safe:rgba(31,95,209,.10);--band-low:rgba(242,107,58,.13);--grid:#E3E7EF;--env-flap:#D5DCEA;
   --font-body:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
   --font-num:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E1412;--surface:#18201D;--surface-2:#25302C;--line:#2A3531;--fg:#E7EDEA;--muted:#9BA9A2;
-  --accent:#47B8A2;--on-accent:#06120F;--accent-soft:#163A33;--accent-soft-fg:#BFE9DF;
-  --l-ess:#6FD6C1;--l-imp:#3A9886;--l-flex:#22594F;
-  --hero:#124A41;--hero-fg:#FFFFFF;--hero-sub:#BFE2D8;--hero-warn:#5E3410;--hero-warn-sub:#F1D2B4;
-  --warn-bg:#3A2610;--warn-fg:#F4C995;--danger:#FF8A7A;--danger-bg:#3D1A16;--backdrop:rgba(0,0,0,.6);
-  --c-exp:#14A07E;--c-cons:#4B8FE0;--c-none:#D9712A;--band-safe:rgba(71,184,162,.12);--band-low:rgba(217,113,42,.14);--grid:#2A3531;--env-flap:#34423D;
+  --bg:#0F1320;--surface:#191E2E;--surface-2:#252B3E;--line:#2C3347;--fg:#E8EBF4;--muted:#9AA3B8;
+  --accent:#6B9BFF;--on-accent:#0A1430;--accent-soft:#1E2C55;--accent-soft-fg:#C9D8FF;
+  --l-ess:#6B9BFF;--l-imp:#A78BFA;--l-flex:#FF8A5C;
+  --hero:#2347A8;--hero-fg:#FFFFFF;--hero-sub:#CAD8FA;--hero-warn:#8A3210;--hero-warn-sub:#FFD9C6;
+  --warn-bg:#3A2A12;--warn-fg:#FFC98A;--danger:#FF7A8E;--danger-bg:#3E1A22;--backdrop:rgba(0,0,0,.6);
+  --pos:#3DD6A0;--pos-soft:#123A2E;--pos-soft-fg:#A8F0D4;
+  --c-house:#FF8A5C;--c-house-soft:#3A2218;--c-house-fg:#FFC4AA;
+  --c-goal:#F5C242;--c-goal-soft:#3A3014;--c-goal-fg:#FCE2A0;--c-week:#2FCB97;
+  --c-exp:#14A07E;--c-cons:#4B8FE0;--c-none:#D9712A;--band-safe:rgba(107,155,255,.13);--band-low:rgba(255,138,92,.15);--grid:#2C3347;--env-flap:#34405A;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0E1412;--surface:#18201D;--surface-2:#25302C;--line:#2A3531;--fg:#E7EDEA;--muted:#9BA9A2;
-  --accent:#47B8A2;--on-accent:#06120F;--accent-soft:#163A33;--accent-soft-fg:#BFE9DF;
-  --l-ess:#6FD6C1;--l-imp:#3A9886;--l-flex:#22594F;
-  --hero:#124A41;--hero-fg:#FFFFFF;--hero-sub:#BFE2D8;--hero-warn:#5E3410;--hero-warn-sub:#F1D2B4;
-  --warn-bg:#3A2610;--warn-fg:#F4C995;--danger:#FF8A7A;--danger-bg:#3D1A16;--backdrop:rgba(0,0,0,.6);
-  --c-exp:#14A07E;--c-cons:#4B8FE0;--c-none:#D9712A;--band-safe:rgba(71,184,162,.12);--band-low:rgba(217,113,42,.14);--grid:#2A3531;--env-flap:#34423D;
+  --bg:#0F1320;--surface:#191E2E;--surface-2:#252B3E;--line:#2C3347;--fg:#E8EBF4;--muted:#9AA3B8;
+  --accent:#6B9BFF;--on-accent:#0A1430;--accent-soft:#1E2C55;--accent-soft-fg:#C9D8FF;
+  --l-ess:#6B9BFF;--l-imp:#A78BFA;--l-flex:#FF8A5C;
+  --hero:#2347A8;--hero-fg:#FFFFFF;--hero-sub:#CAD8FA;--hero-warn:#8A3210;--hero-warn-sub:#FFD9C6;
+  --warn-bg:#3A2A12;--warn-fg:#FFC98A;--danger:#FF7A8E;--danger-bg:#3E1A22;--backdrop:rgba(0,0,0,.6);
+  --pos:#3DD6A0;--pos-soft:#123A2E;--pos-soft-fg:#A8F0D4;
+  --c-house:#FF8A5C;--c-house-soft:#3A2218;--c-house-fg:#FFC4AA;
+  --c-goal:#F5C242;--c-goal-soft:#3A3014;--c-goal-fg:#FCE2A0;--c-week:#2FCB97;
+  --c-exp:#14A07E;--c-cons:#4B8FE0;--c-none:#D9712A;--band-safe:rgba(107,155,255,.13);--band-low:rgba(255,138,92,.15);--grid:#2C3347;--env-flap:#34405A;
   color-scheme:dark}
 
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.55}
@@ -93,7 +102,7 @@ p{margin:0}
 .bar>div{position:absolute;inset-block:0;inset-inline-start:0;border-radius:999px}
 .tag{font-size:11px;border-radius:999px;padding:1px 8px;font-weight:600;white-space:nowrap}
 .tag.warn{background:var(--warn-bg);color:var(--warn-fg)}
-.tag.ok{background:var(--accent-soft);color:var(--accent-soft-fg)}
+.tag.ok{background:var(--pos-soft);color:var(--pos-soft-fg)}
 .tag.bad{background:var(--danger-bg);color:var(--danger)}
 .locked{display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);border-radius:12px;padding:10px 12px;color:var(--muted);font-size:13px}
 .locked span{display:flex;align-items:center;gap:8px}
@@ -119,7 +128,7 @@ p{margin:0}
 .tx .title{font-size:14px;font-weight:500;overflow-wrap:anywhere}
 .tx .meta{font-size:12px;color:var(--muted)}
 .tx .amt{font-size:14px;white-space:nowrap}
-.tx.pos .amt{color:var(--accent);font-weight:600}
+.tx.pos .amt{color:var(--pos);font-weight:600}
 .tx.sys{background:transparent;border:1px dashed var(--line)}
 .tx.sys .title{color:var(--muted)}
 .icon-btn{width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -219,10 +228,12 @@ details.adder summary::-webkit-details-marker{display:none}
 .env .body span{font-size:12px;color:var(--muted);line-height:1.5}
 .env .amt{font-family:var(--font-num);font-size:19px;font-weight:600;white-space:nowrap}
 .env .amt small{font-size:12px;font-weight:400;color:var(--muted);margin-inline-start:3px}
+.env.house .ico{background:var(--c-house-soft);color:var(--c-house-fg)}
+.env.goal .ico{background:var(--c-goal-soft);color:var(--c-goal-fg)}
 .env.warn .ico{background:var(--warn-bg);color:var(--warn-fg)}
 .weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .wk{border-radius:12px;padding:8px;background:var(--surface-2);display:flex;flex-direction:column;gap:4px;min-width:0;border:2px solid transparent}
-.wk.now{border-color:var(--accent);background:var(--surface)}
+.wk.now{border-color:var(--c-week);background:var(--surface)}
 .wk.past{opacity:.75}
 .wk .lab{font-size:11px;color:var(--muted)}
 .wk .v{font-family:var(--font-num);font-size:14px;font-weight:600}
@@ -232,7 +243,7 @@ details.adder summary::-webkit-details-marker{display:none}
 .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
 .step{display:flex;gap:12px;align-items:flex-start}
 .step .mark{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-num);font-size:13px;color:var(--muted)}
-.step.done .mark{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.step.done .mark{background:var(--pos);border-color:var(--pos);color:var(--surface)}
 .step .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .step .txt b{font-size:14px}
 .step .txt p{font-size:13px;color:var(--muted)}
@@ -241,7 +252,7 @@ details.adder summary::-webkit-details-marker{display:none}
 .rules li::marker{color:var(--accent);font-family:var(--font-num);font-weight:600}
 .count-res{display:flex;flex-direction:column;gap:8px}
 .count-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13px}
-.count-row.ok{background:var(--accent-soft);color:var(--accent-soft-fg)}
+.count-row.ok{background:var(--pos-soft);color:var(--pos-soft-fg)}
 .count-row.off{background:var(--warn-bg);color:var(--warn-fg)}
 .fixed-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 40px;gap:8px;align-items:center}
 .fixed-row select,.fixed-row input{height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 10px;font-size:14px;width:100%;min-width:0}
@@ -251,7 +262,7 @@ nav.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);bord
 .tabbar-inner{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;height:72px}
 .nav-btn{background:none;border:none;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);min-height:48px;justify-content:center;cursor:pointer}
 .nav-btn[aria-current="page"]{color:var(--accent);font-weight:600}
-.fab{justify-self:center;width:58px;height:58px;border-radius:50%;border:none;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;margin-top:-30px;box-shadow:0 6px 18px rgba(15,94,82,.35);cursor:pointer}
+.fab{justify-self:center;width:58px;height:58px;border-radius:50%;border:none;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;margin-top:-30px;box-shadow:0 6px 18px rgba(31,95,209,.38);cursor:pointer}
 
 .sheet{position:fixed;inset:0;background:var(--backdrop);z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .panel{background:var(--bg);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding-block:16px calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
@@ -271,7 +282,7 @@ nav.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);bord
 .toast button{background:none;border:none;color:var(--bg);font-weight:700;text-decoration:underline;cursor:pointer;min-height:36px}
 
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:2px}
-.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos)}
 .sync[data-s="pending"]::before,.sync[data-s="saving"]::before{background:var(--c-cons)}
 .sync[data-s="offline"]::before,.sync[data-s="auth"]::before{background:var(--c-none)}
 .gate{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
@@ -747,7 +758,7 @@ function txRow(t,del){
 }
 function weeksStrip(wi){
   return `<div class="weeks">${[1,2,3,4].map(w=>{const sp=wi.spent[w-1], pct=wi.weekly?Math.min(100,sp/wi.weekly*100):0, over=sp>wi.weekly+0.5;
-    return `<div class="wk ${w===wi.cw?'now':w<wi.cw?'past':''}"><span class="lab">أسبوع ${w}${w===wi.cw?' · الحين':''}</span><span class="v">${fmt(sp)}</span><div class="bar"><div style="width:${pct}%;background:${over?'var(--danger)':'var(--accent)'}"></div></div></div>`;}).join('')}</div>`;
+    return `<div class="wk ${w===wi.cw?'now':w<wi.cw?'past':''}"><span class="lab">أسبوع ${w}${w===wi.cw?' · الحين':''}</span><span class="v">${fmt(sp)}</span><div class="bar"><div style="width:${pct}%;background:${over?'var(--danger)':'var(--c-week)'}"></div></div></div>`;}).join('')}</div>`;
 }
 function weekHeadline(wi){
   const note=wi.carry>0.5?` · منها ${fmt(wi.carry)} وفر من الأسابيع اللي فاتت`:wi.carry<-0.5?` · بعد خصم تجاوز ${fmt(-wi.carry)} من قبل`:'';
@@ -965,7 +976,7 @@ function planView(){
       return `<div class="item"><div class="row top-align"><div style="min-width:0"><div class="name">${esc(g.name)}</div>
         <div class="meta">${due?'الموعد: '+monthLabel(due)+' · يحتاج '+fmt(perMonth)+' شهرياً':'بدون موعد'}</div></div>
         <span class="amt">${fmt(a)} <span class="muted small">/ ${fmt(g.target)}</span></span></div>
-        <div class="bar"><div style="width:${pct}%;background:var(--accent)"></div></div>
+        <div class="bar"><div style="width:${pct}%;background:var(--c-goal)"></div></div>
         <div class="row"><span class="small">${a>=g.target?'<span class="tag ok">جاهز</span>':e?`<span class="muted">بالمتوسط توصلون له: </span><b class="num">${monthLabel(e)}</b> ${due?(late?'<span class="tag bad">بعد الموعد</span>':'<span class="tag ok">قبل الموعد</span>'):''}`:'<span class="tag bad">ما يتحقق خلال 4 سنين بالمتوسط</span>'}</span>
           <span class="item-actions">
             <button type="button" class="icon-btn" data-action="goal-up" data-id="${g.id}" aria-label="ارفع الأولوية" ${i===0?'disabled':''}>${ICON.up}</button>
@@ -999,7 +1010,7 @@ function planView(){
       return `<div class="item"><div class="row top-align"><div style="min-width:0"><div class="name">${esc(dd.name)}</div>
         <div class="meta">${left>0?'قسط '+fmt(dd.inst)+' · يخلص '+monthLabel(addMonths(S.month,months)):'<span class="tag ok">انتهى</span> تحرر قسط '+fmt(dd.inst)+' شهرياً. خفّضوا حصة الأساسي أو خلّوه يروح للفايض.'}</div></div>
         <span class="amt">${fmt(left)} <span class="muted small">باقي</span></span></div>
-        <div class="bar"><div style="width:${pct}%;background:var(--accent)"></div></div>
+        <div class="bar"><div style="width:${pct}%;background:var(--pos)"></div></div>
         <div class="row"><span class="small muted">سدّدتوا ${fmt(paid)} من ${fmt(dd.amount)}</span>
           <button type="button" class="icon-btn" data-action="del-debt" data-id="${dd.id}" aria-label="حذف ${esc(dd.name)}">${ICON.trash}</button></div>
         ${left>0?`<div class="btn-row">${S.tx.some(t=>t.t==='exp'&&t.m===S.month&&t.debtId===dd.id)?'<span class="tag ok" style="align-self:center">قسط الشهر مسجّل</span>':`<button type="button" class="btn small" data-action="debt-inst" data-id="${dd.id}">سجّل قسط الشهر</button>`}<button type="button" class="btn small ghost" data-action="debt-extra" data-id="${dd.id}">قسط إضافي من الاحتياطي</button></div>`:''}
@@ -1024,9 +1035,9 @@ function envView(){
   let h=header('الظروف');
 
   h+=`<section class="envs" aria-label="الظروف">
-    <div class="env ${hc<0?'warn':''}"><span class="ico">${ICON.home}</span><div class="body"><b>ظرف البيت</b><span>الباقي من حصة ${monthShort(S.month)}</span></div><span class="amt ${hc<0?'over':''}">${fmt(hc)}</span></div>
+    <div class="env house ${hc<0?'warn':''}"><span class="ico">${ICON.home}</span><div class="body"><b>ظرف البيت</b><span>الباقي من حصة ${monthShort(S.month)}</span></div><span class="amt ${hc<0?'over':''}">${fmt(hc)}</span></div>
     <div class="env"><span class="ico">${ICON_TANK20}</span><div class="body"><b>ظرف الاحتياطي</b><span>${res>cashCap?`${fmt(cashCap)} كاش · ${fmt(res-cashCap)} في حساب الادخار`:'كله كاش في الظرف'}</span></div><span class="amt">${fmt(res)}</span></div>
-    <div class="env"><span class="ico">${ICON.star}</span><div class="body"><b>ظرف الأهداف</b><span>${goalsTotal>0?`أهداف ${fmt(b.goals)} · متعة ${fmt(b.fun)}`:'يتعبّى من الفايض'}</span></div><span class="amt">${fmt(goalsTotal)}</span></div>
+    <div class="env goal"><span class="ico">${ICON.star}</span><div class="body"><b>ظرف الأهداف</b><span>${goalsTotal>0?`أهداف ${fmt(b.goals)} · متعة ${fmt(b.fun)}`:'يتعبّى من الفايض'}</span></div><span class="amt">${fmt(goalsTotal)}</span></div>
   </section>`;
 
   h+=`<section class="card"><h2>ظروف الأسابيع</h2>
