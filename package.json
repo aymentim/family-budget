@@ -1,0 +1,11 @@
+{
+  "name": "family-budget",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:page": "python3 src/build.py"
+  },
+  "dependencies": {
+    "@netlify/blobs": "10.7.13"
+  }
+}

@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="budget-live" content="1">
+<meta name="theme-color" content="#0F5E52">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الميزانية">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ميزانية العائلة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column, bottom nav with a center add button, bottom sheet for entries */
+:root{
+  --bg:#F2F4F1;--surface:#FFFFFF;--surface-2:#E8ECE9;--line:#E1E7E3;--fg:#17211D;--muted:#56635D;
+  --accent:#0F5E52;--on-accent:#FFFFFF;--accent-soft:#DDF0EA;--accent-soft-fg:#0A4038;
+  --l-ess:#0F5E52;--l-imp:#3E9C8A;--l-flex:#9FD3C7;
+  --hero:#0F5E52;--hero-fg:#FFFFFF;--hero-sub:#CDE9E1;--hero-warn:#8A4B12;--hero-warn-sub:#F6DCC2;
+  --warn-bg:#FBEBD9;--warn-fg:#7A3F0C;--danger:#B42318;--danger-bg:#FCE7E4;--backdrop:rgba(10,20,17,.45);
+  --c-exp:#007E5C;--c-cons:#3A7FD0;--c-none:#C2570A;--band-safe:rgba(15,94,82,.10);--band-low:rgba(194,87,10,.10);--grid:#E3E8E5;--env-flap:#CFDAD4;
+  --font-body:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+  --font-num:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1412;--surface:#18201D;--surface-2:#25302C;--line:#2A3531;--fg:#E7EDEA;--muted:#9BA9A2;
+  --accent:#47B8A2;--on-accent:#06120F;--accent-soft:#163A33;--accent-soft-fg:#BFE9DF;
+  --l-ess:#6FD6C1;--l-imp:#3A9886;--l-flex:#22594F;
+  --hero:#124A41;--hero-fg:#FFFFFF;--hero-sub:#BFE2D8;--hero-warn:#5E3410;--hero-warn-sub:#F1D2B4;
+  --warn-bg:#3A2610;--warn-fg:#F4C995;--danger:#FF8A7A;--danger-bg:#3D1A16;--backdrop:rgba(0,0,0,.6);
+  --c-exp:#14A07E;--c-cons:#4B8FE0;--c-none:#D9712A;--band-safe:rgba(71,184,162,.12);--band-low:rgba(217,113,42,.14);--grid:#2A3531;--env-flap:#34423D;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412;--surface:#18201D;--surface-2:#25302C;--line:#2A3531;--fg:#E7EDEA;--muted:#9BA9A2;
+  --accent:#47B8A2;--on-accent:#06120F;--accent-soft:#163A33;--accent-soft-fg:#BFE9DF;
+  --l-ess:#6FD6C1;--l-imp:#3A9886;--l-flex:#22594F;
+  --hero:#124A41;--hero-fg:#FFFFFF;--hero-sub:#BFE2D8;--hero-warn:#5E3410;--hero-warn-sub:#F1D2B4;
+  --warn-bg:#3A2610;--warn-fg:#F4C995;--danger:#FF8A7A;--danger-bg:#3D1A16;--backdrop:rgba(0,0,0,.6);
+  --c-exp:#14A07E;--c-cons:#4B8FE0;--c-none:#D9712A;--band-safe:rgba(71,184,162,.12);--band-low:rgba(217,113,42,.14);--grid:#2A3531;--env-flap:#34423D;
+  color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.55}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+
+.app{max-width:480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px calc(112px + env(safe-area-inset-bottom,0px))}
+#view{display:flex;flex-direction:column;gap:14px}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top .eyebrow{font-size:13px;color:var(--muted)}
+.top h1{font-family:var(--font-num);font-size:22px;font-weight:600}
+.top-end{display:flex;align-items:center;gap:8px}
+.avatars{display:flex}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;border:2px solid var(--bg);flex-shrink:0}
+.av.a0{background:var(--accent);color:var(--on-accent)}
+.av.a1{background:var(--accent-soft);color:var(--accent-soft-fg)}
+.avatars .av+.av{margin-inline-start:-10px}
+.gear{width:44px;height:44px;border-radius:50%;border:none;background:var(--surface);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.gear[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+
+.card{background:var(--surface);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card h2{font-size:15px;font-weight:600}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row.top-align{align-items:flex-start}
+.section-title{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 4px 0}
+.section-title h2{font-size:17px;font-family:var(--font-num);font-weight:600}
+
+.hero{background:var(--hero);color:var(--hero-fg);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.hero.warn{background:var(--hero-warn)}
+.hero .sub{color:var(--hero-sub);font-size:13px}
+.hero.warn .sub{color:var(--hero-warn-sub)}
+.hero .big{font-family:var(--font-num);font-size:34px;font-weight:600;line-height:1.2}
+.hero .cur{font-size:14px;font-weight:400}
+.pill{background:rgba(255,255,255,.16);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.cov{display:flex;align-items:baseline;gap:8px}
+.cov .num{font-size:26px;font-weight:600}
+.gauge{position:relative;height:10px;border-radius:999px;background:rgba(255,255,255,.16)}
+.gauge .zone{position:absolute;inset-block:0;background:rgba(255,255,255,.2);border-radius:999px}
+.gauge .fill{position:absolute;inset-block:2px;inset-inline-start:2px;background:#FFFFFF;border-radius:999px;max-width:calc(100% - 4px)}
+.legend{display:flex;justify-content:space-between;font-size:11px}
+.hero .runway{border-top:1px solid rgba(255,255,255,.18);padding-top:10px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+
+.banner{border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.banner svg{flex-shrink:0;margin-top:3px}
+.banner b{display:block;font-size:14px}
+.banner p{font-size:13px}
+.banner.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.banner.info{background:var(--accent-soft);color:var(--accent-soft-fg)}
+.banner.danger{background:var(--danger-bg);color:var(--danger)}
+
+.layer{display:flex;flex-direction:column;gap:6px}
+.lname{display:flex;align-items:center;gap:8px;font-size:14px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex-shrink:0}
+.bar{height:8px;border-radius:999px;background:var(--surface-2);position:relative;overflow:hidden}
+.bar>div{position:absolute;inset-block:0;inset-inline-start:0;border-radius:999px}
+.tag{font-size:11px;border-radius:999px;padding:1px 8px;font-weight:600;white-space:nowrap}
+.tag.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.tag.ok{background:var(--accent-soft);color:var(--accent-soft-fg)}
+.tag.bad{background:var(--danger-bg);color:var(--danger)}
+.locked{display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);border-radius:12px;padding:10px 12px;color:var(--muted);font-size:13px}
+.locked span{display:flex;align-items:center;gap:8px}
+
+.salary .amount{font-family:var(--font-num);font-size:18px;font-weight:600}
+.over{color:var(--danger);font-weight:600}
+
+.btn{min-height:48px;border-radius:14px;border:none;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:15px;padding:0 16px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.small{min-height:44px;font-size:14px;padding:0 14px}
+.btn.danger{background:var(--danger);color:#FFFFFF}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.block{width:100%}
+.link-btn{background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;min-height:40px;padding:0 8px;border-radius:10px;cursor:pointer}
+.link-btn:hover{background:var(--surface-2)}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+
+.txlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tx{background:var(--surface);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:12px}
+.tx .av{width:30px;height:30px;font-size:12px;border:none}
+.tx .av.sys{background:var(--surface-2);color:var(--muted)}
+.tx .body{flex:1;min-width:0;display:flex;flex-direction:column}
+.tx .title{font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.tx .meta{font-size:12px;color:var(--muted)}
+.tx .amt{font-size:14px;white-space:nowrap}
+.tx.pos .amt{color:var(--accent);font-weight:600}
+.tx.sys{background:transparent;border:1px dashed var(--line)}
+.tx.sys .title{color:var(--muted)}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.icon-btn:hover{background:var(--surface-2)}
+.icon-btn:disabled{opacity:.3;cursor:default}
+.month-head{display:flex;justify-content:space-between;align-items:baseline;padding:6px 4px 0;font-size:13px;gap:8px;flex-wrap:wrap}
+.month-head b{font-size:15px}
+
+.sim{border:1px dashed var(--line);background:transparent}
+
+.alloc{display:flex;flex-direction:column;gap:6px}
+.buckets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bucket{background:var(--surface-2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.bucket span:first-child{font-size:12px;color:var(--muted)}
+.bucket .num{font-size:16px;font-weight:600}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:start;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500}
+td.num{font-size:13px;text-align:right}
+.tx .amt,.tip .num,td.num{direction:ltr;unicode-bidi:isolate}
+
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.field input,.field select,.cat-item input,.add-cat input{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 12px;font-size:15px;width:100%;min-width:0}
+.field input.num{font-family:var(--font-num)}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.hint{font-size:12px;color:var(--muted)}
+.hint.bad{color:var(--danger);font-weight:600}
+.big-line{display:flex;align-items:baseline;gap:6px}
+.big-line .num{font-size:30px;font-weight:600}
+
+.cat-group{display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.cat-group+.cat-group{border-top:1px solid var(--line);padding-top:14px}
+.cat-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.cat-item{display:flex;align-items:center;gap:6px}
+.cat-item input{flex:1;height:44px}
+.add-cat{display:flex;gap:8px}
+.add-cat input{flex:1;height:44px;background:transparent;border-style:dashed}
+.add-cat .btn{flex-shrink:0}
+
+/* plan */
+.breakdown{display:flex;flex-direction:column;gap:2px}
+.breakdown .row{min-height:30px;font-size:14px}
+.breakdown .row.total{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-weight:600}
+.need-big{display:flex;align-items:baseline;gap:6px}
+.need-big .num{font-size:32px;font-weight:600;line-height:1.2}
+.dry{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.dry li{display:flex;justify-content:space-between;gap:10px;font-size:14px;align-items:baseline}
+.dry li b{font-family:var(--font-num);font-weight:600;white-space:nowrap}
+.chart-wrap{position:relative}
+.chart-wrap svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.chart-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.chart-legend span{display:flex;align-items:center;gap:6px}
+.sw{width:18px;height:0;border-top-width:2.5px;border-top-color:currentColor;display:inline-block}
+.sw.exp{border-top-style:solid;color:var(--c-exp)}
+.sw.cons{border-top-style:dashed;color:var(--c-cons)}
+.sw.none{border-top-style:dotted;color:var(--c-none);border-top-width:3px}
+.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ln.exp{stroke:var(--c-exp)}
+.ln.cons{stroke:var(--c-cons);stroke-dasharray:6 4}
+.ln.none{stroke:var(--c-none);stroke-dasharray:1.5 4;stroke-width:2.5}
+.ax{fill:var(--muted);font-size:10px;font-family:var(--font-num)}
+.endlab{font-size:10px;font-family:var(--font-num);fill:var(--fg)}
+.gridl{stroke:var(--grid);stroke-width:1}
+.band-safe{fill:var(--band-safe)}
+.band-low{fill:var(--band-low)}
+.band-lab{font-size:9px;fill:var(--muted);font-family:var(--font-body)}
+.cross{stroke:var(--muted);stroke-width:1}
+.tip{position:absolute;top:4px;background:var(--fg);color:var(--bg);border-radius:10px;padding:8px 10px;font-size:12px;pointer-events:none;min-width:130px;z-index:2;line-height:1.6}
+.tip .t-row{display:flex;justify-content:space-between;gap:12px}
+.tip .t-row i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:6px}
+details.more summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:600;min-height:40px;display:flex;align-items:center}
+details.adder{border:1px dashed var(--line);border-radius:14px;padding:0 12px}
+details.adder[open]{padding-bottom:12px}
+details.adder summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;min-height:48px;display:flex;align-items:center;list-style:none}
+details.adder summary::-webkit-details-marker{display:none}
+.adder-body{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;flex-direction:column;gap:8px;padding-block:12px;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:none;padding-top:0}
+.item .name{font-weight:600;font-size:15px;overflow-wrap:anywhere}
+.item .meta{font-size:12px;color:var(--muted)}
+.item .amt{font-family:var(--font-num);font-weight:600;white-space:nowrap}
+.item-actions{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.empty{font-size:13px;color:var(--muted);padding:4px 0}
+
+/* envelopes */
+.envs{background:var(--surface);border-radius:18px;padding:4px 16px;display:flex;flex-direction:column}
+.env{display:flex;gap:12px;align-items:center;padding-block:14px}
+.env+.env{border-top:1px solid var(--line)}
+.env .ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--accent-soft);color:var(--accent-soft-fg)}
+.env .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.env .body b{font-size:15px;font-weight:600}
+.env .body span{font-size:12px;color:var(--muted);line-height:1.5}
+.env .amt{font-family:var(--font-num);font-size:19px;font-weight:600;white-space:nowrap}
+.env .amt small{font-size:12px;font-weight:400;color:var(--muted);margin-inline-start:3px}
+.env.warn .ico{background:var(--warn-bg);color:var(--warn-fg)}
+.weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.wk{border-radius:12px;padding:8px;background:var(--surface-2);display:flex;flex-direction:column;gap:4px;min-width:0;border:2px solid transparent}
+.wk.now{border-color:var(--accent);background:var(--surface)}
+.wk.past{opacity:.75}
+.wk .lab{font-size:11px;color:var(--muted)}
+.wk .v{font-family:var(--font-num);font-size:14px;font-weight:600}
+.wk .bar{height:5px}
+.week-big{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.week-big .num{font-size:30px;font-weight:600;line-height:1.2}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.step .mark{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-num);font-size:13px;color:var(--muted)}
+.step.done .mark{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.step .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.step .txt b{font-size:14px}
+.step .txt p{font-size:13px;color:var(--muted)}
+.step.done .txt b{color:var(--muted);text-decoration:line-through}
+.rules{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.rules li::marker{color:var(--accent);font-family:var(--font-num);font-weight:600}
+.count-res{display:flex;flex-direction:column;gap:8px}
+.count-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13px}
+.count-row.ok{background:var(--accent-soft);color:var(--accent-soft-fg)}
+.count-row.off{background:var(--warn-bg);color:var(--warn-fg)}
+.fixed-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 40px;gap:8px;align-items:center}
+.fixed-row select,.fixed-row input{height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 10px;font-size:14px;width:100%;min-width:0}
+.fixed-row .debt-link{grid-column:1 / span 2}
+
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));z-index:20}
+.tabbar-inner{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;height:72px}
+.nav-btn{background:none;border:none;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);min-height:48px;justify-content:center;cursor:pointer}
+.nav-btn[aria-current="page"]{color:var(--accent);font-weight:600}
+.fab{justify-self:center;width:58px;height:58px;border-radius:50%;border:none;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;margin-top:-30px;box-shadow:0 6px 18px rgba(15,94,82,.35);cursor:pointer}
+
+.sheet{position:fixed;inset:0;background:var(--backdrop);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--bg);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding-block:16px calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.seg{background:var(--surface-2);border-radius:14px;padding:4px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px}
+.seg button{height:44px;border:none;border-radius:11px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.amount-box{background:var(--surface);border-radius:20px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.amount-box input{border:none;outline:none;background:transparent;text-align:center;font-family:var(--font-num);font-size:42px;font-weight:600;width:100%;max-width:220px}
+.amount-box input:focus-visible{outline:2px solid var(--accent);border-radius:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.group-label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:6px}
+.form-error{color:var(--danger);font-size:13px;font-weight:600;min-height:20px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);border-radius:14px;padding:10px 14px;font-size:13px;z-index:60;display:flex;gap:12px;align-items:center;width:max-content;max-width:calc(100% - 32px)}
+.toast button{background:none;border:none;color:var(--bg);font-weight:700;text-decoration:underline;cursor:pointer;min-height:36px}
+
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:2px}
+.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.sync[data-s="pending"]::before,.sync[data-s="saving"]::before{background:var(--c-cons)}
+.sync[data-s="offline"]::before,.sync[data-s="auth"]::before{background:var(--c-none)}
+.gate{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+.gate-box{width:100%;max-width:380px;display:flex;flex-direction:column;gap:16px}
+.gate-box h1{font-family:var(--font-num);font-size:26px}
+.gate-box .field input{height:52px;font-size:17px}
+.pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pick button{min-height:88px;border-radius:18px;border:1px solid var(--line);background:var(--surface);font-size:17px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.pick .av{width:40px;height:40px;font-size:16px}
+@media (prefers-reduced-motion: no-preference){
+  .panel{animation:up .22s ease-out}
+  @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+
+
+<div dir="rtl">
+<div class="app">
+  <main id="view"></main>
+</div>
+
+<nav class="tabbar" aria-label="التنقل">
+  <div class="tabbar-inner">
+    <button class="nav-btn" data-tab="home" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+      الرئيسية
+    </button>
+    <button class="nav-btn" data-tab="tx" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+      العمليات
+    </button>
+    <button class="fab" type="button" data-action="open-sheet" aria-label="إضافة عملية">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <button class="nav-btn" data-tab="plan" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/></svg>
+      الخطة
+    </button>
+    <button class="nav-btn" data-tab="env" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
+      الظروف
+    </button>
+  </div>
+</nav>
+
+<div class="sheet" id="sheet" hidden>
+  <form class="panel" id="txForm" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" novalidate>
+    <div class="row">
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="إغلاق" style="background:var(--surface);width:44px;height:44px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <h2 id="sheetTitle" class="num" style="font-size:18px">عملية جديدة</h2>
+      <span style="width:44px"></span>
+    </div>
+    <div class="seg" role="group" aria-label="نوع العملية">
+      <button type="button" data-kind="exp" aria-pressed="true">مصروف</button>
+      <button type="button" data-kind="inc" aria-pressed="false">إيراد</button>
+      <button type="button" data-kind="emg" aria-pressed="false">طارئ</button>
+    </div>
+    <div class="amount-box">
+      <label for="f-amount" class="small muted">المبلغ (د.ت)</label>
+      <input id="f-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+    </div>
+    <div id="catWrap" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="small" style="font-weight:600">مين سجّل؟</div>
+      <div class="chips" id="whoWrap"></div>
+    </div>
+    <div class="field">
+      <label for="f-note">ملاحظة (اختياري)</label>
+      <input id="f-note" type="text" autocomplete="off" placeholder="مثلاً: سوق الأسبوع">
+    </div>
+    <div class="form-error" id="formError" role="alert"></div>
+    <button type="submit" class="btn block">حفظ</button>
+  </form>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <form class="gate-box" id="gateForm" novalidate>
+    <h1>ميزانية العائلة</h1>
+    <p class="muted">اكتبوا كلمة سر العائلة. تنكتب مرة وحدة على كل جوال.</p>
+    <div class="field"><label for="g-pass">كلمة السر</label><input id="g-pass" type="password" autocomplete="current-password" required></div>
+    <p class="form-error" id="g-err" role="alert"></p>
+    <button type="submit" class="btn block">دخول</button>
+  </form>
+  <div class="gate-box" id="pickMe" hidden>
+    <h1>مين أنت؟</h1>
+    <p class="muted">عشان تنكتب العمليات باسمك. تقدر تغيّره من الإعدادات.</p>
+    <div class="pick" id="pickBtns"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button type="button" id="toastUndo" hidden>تراجع</button></div>
+</div>
+
+<script>
+(function(){
+document.documentElement.lang='ar';
+
+const KEY='khazzan-proto-v1';
+const MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const LAYERS=[{id:'ess',name:'أساسي'},{id:'imp',name:'مهم'},{id:'flex',name:'مرن'}];
+const DEFAULT_CATS=()=>({
+  ess:[{id:'rent',name:'إيجار'},{id:'food',name:'أكل وخضرة'},{id:'bills',name:'فواتير'},{id:'kid',name:'الطفل'},{id:'debt',name:'سداد الديون'}],
+  imp:[{id:'car',name:'السيارة'},{id:'net',name:'نت وهاتف'},{id:'move',name:'تنقل'}],
+  flex:[{id:'out',name:'طلعات'},{id:'clothes',name:'ملابس'},{id:'gifts',name:'هدايا'}]
+});
+const BUCKETS=[['goals','الأهداف'],['fun','متعة العائلة']];
+const MODE_LABEL={surplus:'فايض',safe:'آمن',austerity:'ترشيد'};
+const SHARE_KIND={surplus:'حصة كاملة',safe:'حصة كاملة',austerity:'حصة مرشّدة: المرن موقوف'};
+
+const ICON={
+  alert:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg>',
+  info:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+  ok:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  lock:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  trash:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  up:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>',
+  down:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',
+  gear:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+  env:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  star:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+  tank:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/></svg>'
+};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const fmtK=v=>{const a=Math.abs(v);if(a>=1000){const k=v/1000;return (Math.round(k*10)/10).toLocaleString('en-US')+'k';}return fmt(v);};
+const sum3=o=>o.ess+o.imp+o.flex;
+let uidN=1;
+const uid=()=>'t'+Date.now().toString(36)+(uidN++);
+const ym=m=>{const [y,mm]=m.split('-').map(Number);return {y,mm};};
+const mkey=(y,mm)=>y+'-'+String(mm).padStart(2,'0');
+const monthLabel=m=>{const {y,mm}=ym(m);return MONTHS[mm-1]+' '+y;};
+const monthShort=m=>MONTHS[ym(m).mm-1];
+const nextMonth=m=>{let {y,mm}=ym(m);mm++;if(mm>12){mm=1;y++;}return mkey(y,mm);};
+const addMonths=(m,n)=>{let {y,mm}=ym(m);const t=y*12+(mm-1)+n;return mkey(Math.floor(t/12),t%12+1);};
+const monthsBetween=(a,b)=>{const A=ym(a),B=ym(b);return (B.y-A.y)*12+(B.mm-A.mm);};
+const thisMonth=()=>{const d=new Date();return mkey(d.getFullYear(),d.getMonth()+1);};
+const inMonths=n=>n<=0?'هذا الشهر':n===1?'الشهر الجاي':n===2?'بعد شهرين':n<=10?'بعد '+n+' شهور':'بعد '+n+' شهر';
+function findCat(id){const c=S.settings.cats;for(const l in c){const x=c[l].find(i=>i.id===id);if(x)return {layer:l,name:x.name};}return null;}
+function catName(t){const f=findCat(t.cat);return f?f.name:(t.cname||'بند محذوف');}
+function isDebtCat(id){if(id==='debt')return true;const f=findCat(id);return !!(f&&/دين|ديون|قرض|أقساط|قسط/.test(f.name));}
+const layerName=id=>(LAYERS.find(l=>l.id===id)||{name:''}).name;
+const bucketName=id=>(BUCKETS.find(b=>b[0]===id)||['',''])[1];
+const byId=(arr,id)=>arr.find(x=>x.id===id);
+
+/* ---------- engine: reservoir and monthly share ---------- */
+function fullShare(s){return sum3(s.settings.budgets);}
+function reservoir(s){let r=s.opening;for(const t of s.tx){if(t.t==='inc'||t.t==='close'||t.t==='adj')r+=t.amt;else if(t.t==='salary'||t.t==='dist'||t.t==='planned'||t.t==='debtx'||t.t==='emerg')r-=t.amt;}return r;}
+function modeFor(s,res){
+  const fs=fullShare(s);if(fs<=0)return 'safe';
+  const c=res/fs, st=s.settings;
+  if(res>st.tMax*fs)return 'surplus';
+  return c>=st.brake?'safe':'austerity';
+}
+function plannedFor(s,mode){
+  const b=s.settings.budgets;
+  if(mode==='austerity')return {ess:b.ess,imp:b.imp,flex:0};
+  return {ess:b.ess,imp:b.imp,flex:b.flex};
+}
+function monthMode(s,m){const t=s.tx.find(x=>x.t==='salary'&&x.m===m);return t?t.mode:modeFor(s,reservoir(s));}
+function payShare(s){
+  const res=reservoir(s), mode=modeFor(s,res), need=sum3(plannedFor(s,mode));
+  const amt=Math.max(0,Math.min(need,res));
+  s.tx.push({id:'sal-'+s.month,t:'salary',amt,mode,m:s.month,d:1});
+  return {amt,need,mode};
+}
+function stats(s,m){
+  const mode=monthMode(s,m), planned=plannedFor(s,mode);
+  const spent={ess:0,imp:0,flex:0};let paid=0,inc=0;
+  for(const t of s.tx){if(t.m!==m)continue;
+    if(t.t==='exp'&&spent[t.layer]!=null)spent[t.layer]+=t.amt;
+    else if(t.t==='salary')paid+=t.amt;
+    else if(t.t==='inc')inc+=t.amt;}
+  const spentTotal=sum3(spent);
+  return {mode,planned,spent,spentTotal,paid,inc,left:paid-spentTotal};
+}
+function closeMonth(s){
+  const st=stats(s,s.month), old=s.month;
+  s.tx.push({id:'close-'+old,t:'close',amt:st.left,m:old,d:31});
+  s.month=nextMonth(old);
+  const pay=payShare(s);
+  return {old,left:st.left,pay};
+}
+function goalsPool(){let g=0;for(const t of S.tx){if(t.t==='dist'&&(t.to==='goals'||t.to==='proj'))g+=t.amt;else if(t.t==='goalspend')g-=t.amt;else if(t.t==='gadj')g+=t.amt;}return g;}
+function buckets(s){const b={goals:0,fun:0};for(const t of s.tx){if(t.t==='dist'){if(t.to==='fun')b.fun+=t.amt;else b.goals+=t.amt;}else if(t.t==='goalspend')b.goals-=t.amt;else if(t.t==='gadj')b.goals+=t.amt;}return b;}
+const bucketsTotal=b=>b.goals+b.fun;
+
+/* ---------- envelopes ---------- */
+const weekOf=d=>Math.min(4,Math.max(1,Math.ceil((d||1)/7)));
+const todayDay=()=>new Date().getDate();
+function fixedActive(f){if(!f.debtId)return true;const d=byId(S.debts,f.debtId);return !!d&&debtLeft(d)>0;}
+const activeFixed=()=>S.fixed.filter(fixedActive);
+function fixedDone(f){return S.tx.some(t=>t.t==='exp'&&t.m===S.month&&(t.fixedId===f.id||(t.cat===f.cat&&(!f.debtId||t.debtId===f.debtId)&&!t.fixedId)));}
+function weekInfo(){
+  const st=stats(S,S.month), af=activeFixed(), fx=new Set(af.map(f=>f.cat));
+  const fixedTotal=af.reduce((a,f)=>a+f.amt,0);
+  const varBudget=Math.max(0,st.paid-fixedTotal), weekly=varBudget/4, cw=weekOf(todayDay());
+  const spent=[0,0,0,0];
+  for(const t of S.tx){if(t.m!==S.month||t.t!=='exp'||fx.has(t.cat))continue;spent[weekOf(t.d)-1]+=t.amt;}
+  const before=spent.slice(0,cw-1).reduce((a,b)=>a+b,0), carry=weekly*(cw-1)-before;
+  return {st,weekly,spent,cw,carry,left:weekly+carry-spent[cw-1],varBudget,fixedTotal,unpaid:af.filter(f=>!fixedDone(f))};
+}
+function houseCash(){const st=stats(S,S.month);return st.paid-st.spentTotal;}
+function ritual(){return S.ritual[S.month]||{};}
+function surplusOf(s){return reservoir(s)-s.settings.tMax*fullShare(s);}
+function avgSpend(s){
+  const closed=[...new Set(s.tx.filter(t=>t.t==='close').map(t=>t.m))].slice(-3);
+  if(!closed.length)return null;
+  const tot=closed.reduce((a,m)=>a+stats(s,m).spentTotal,0);
+  return {avg:tot/closed.length,n:closed.length};
+}
+
+/* ---------- engine: planning ---------- */
+const planStart=p=>mkey(p.yy,p.mm);
+function planPaid(p,occ){return S.tx.some(t=>t.t==='planned'&&t.planId===p.id&&t.occ===occ);}
+function planNext(p){
+  if(!p.yearly){const occ=planStart(p);if(planPaid(p,occ))return null;return {occ,overdue:occ<S.month};}
+  const cy=ym(S.month).y;let occ=mkey(cy,p.mm);
+  if(occ<S.month)occ=mkey(cy+1,p.mm);
+  if(occ<planStart(p))occ=planStart(p);
+  if(planPaid(p,occ))occ=mkey(ym(occ).y+1,p.mm);
+  return {occ,overdue:false};
+}
+function dueNow(){return S.plans.map(p=>({p,n:planNext(p)})).filter(x=>x.n&&x.n.occ<=S.month);}
+function plannedOutAt(K){
+  let s=0;
+  for(const p of S.plans){
+    if(p.yearly){if(ym(K).mm===p.mm&&K>=planStart(p)&&!planPaid(p,K))s+=p.amt;}
+    else if(planStart(p)===K&&!planPaid(p,K))s+=p.amt;
+  }
+  return s;
+}
+function provision(){
+  let yearly=0,once=0;const end=addMonths(S.month,11);
+  for(const p of S.plans){
+    if(p.yearly)yearly+=p.amt/12;
+    else{const n=planNext(p);if(n&&n.occ<=end)once+=p.amt/12;}
+  }
+  return {yearly,once,total:yearly+once};
+}
+function goalAlloc(){
+  let avail=Math.max(0,goalsPool());const m={};
+  for(const g of S.goals){if(g.done)continue;const a=Math.max(0,Math.min(g.target,avail));m[g.id]=a;avail-=a;}
+  return {m,free:Math.max(0,avail)};
+}
+function goalsMonthlyNeed(){
+  const al=goalAlloc().m;let need=0;
+  for(const g of S.goals){if(g.done||!g.yy)continue;const left=Math.max(0,g.target-(al[g.id]||0));if(!left)continue;need+=left/Math.max(1,monthsBetween(S.month,mkey(g.yy,g.mm)));}
+  return need;
+}
+function debtPaid(d){let p=0;for(const t of S.tx)if(t.debtId===d.id&&(t.t==='exp'||t.t==='debtx'))p+=t.amt;return p;}
+const debtLeft=d=>Math.max(0,d.amount-debtPaid(d));
+function incomeHistory(){
+  const months=[...new Set(S.tx.map(t=>t.m))].sort().slice(-6);
+  const tot=S.tx.filter(t=>t.t==='inc'&&months.includes(t.m)).reduce((a,t)=>a+t.amt,0);
+  return {avg:months.length?tot/months.length:0,n:months.length};
+}
+function expectedIncome(){return S.settings.expectedIncome>0?S.settings.expectedIncome:Math.round(incomeHistory().avg);}
+
+// Month-by-month projection using the same rules the app applies: share by mode, planned outflows, income, surplus distributed above the max target.
+function simulate(income,n){
+  const fs=fullShare(S), st=S.settings;let res=reservoir(S);
+  res-=dueNow().reduce((a,x)=>a+x.p.amt,0);
+  const pts=[{m:S.month,res,mode:modeFor(S,res),short:0,out:0,goalsIn:0}];let goalsIn=0,m=S.month;
+  for(let k=1;k<=n;k++){
+    m=nextMonth(m);
+    const mode=modeFor(S,res), need=sum3(plannedFor(S,mode)), paid=Math.max(0,Math.min(need,res));
+    res-=paid;const out=plannedOutAt(m);res-=out;res+=income;
+    const cap=st.tMax*fs;if(fs>0&&res>cap){goalsIn+=(res-cap)*st.split.goals/100;res=cap;}
+    pts.push({m,res,mode,short:need-paid,out,goalsIn});
+  }
+  return pts;
+}
+function dryRun(){
+  const pts=simulate(0,36);
+  const firstShort=pts.find((p,i)=>i>0&&p.short>0.5);
+  const firstAust=pts.find((p,i)=>i>0&&p.mode==='austerity');
+  const lastFull=firstAust?addMonths(firstAust.m,-1):firstShort?addMonths(firstShort.m,-1):null;
+  return {firstShort,firstAust,lastFull};
+}
+
+/* ---------- sample data (examples, clearly flagged in the UI) ---------- */
+function defaultSettings(){return {budgets:{ess:2000,imp:700,flex:500},brake:1.5,tMax:6,split:{goals:90,fun:10},members:['أيمن','الزوجة'],cats:DEFAULT_CATS(),expectedIncome:0};}
+function sample(){
+  const s={settings:defaultSettings(),opening:9600,month:'2026-08',tx:[],isSample:true,
+    plans:[
+      {id:'p1',name:'رسوم المدرسة',amt:1200,mm:9,yy:2027,yearly:true},
+      {id:'p2',name:'تأمين السيارة',amt:650,mm:2,yy:2027,yearly:true},
+      {id:'p3',name:'رمضان والعيد',amt:800,mm:2,yy:2027,yearly:false},
+      {id:'p4',name:'أضحية العيد',amt:900,mm:5,yy:2027,yearly:false},
+      {id:'p5',name:'سفرة الصيف',amt:1500,mm:7,yy:2027,yearly:true}
+    ],
+    goals:[
+      {id:'g1',name:'مقدّم سيارة',target:6000,mm:6,yy:2028,done:false},
+      {id:'g2',name:'تعليم الطفل',target:4000,mm:null,yy:null,done:false}
+    ],
+    debts:[{id:'d1',name:'قرض شخصي',amount:4600,inst:200}],
+    fixed:[{id:'f1',cat:'rent',amt:900},{id:'f2',cat:'bills',amt:180},{id:'f3',cat:'debt',amt:200,debtId:'d1'},{id:'f4',cat:'net',amt:90}],
+    ritual:{},lastCount:null
+  };
+  const cats=s.settings.cats, layerOf=id=>{for(const l in cats)if(cats[l].some(c=>c.id===id))return l;return 'ess';}, nameOf=id=>{for(const l in cats){const c=cats[l].find(x=>x.id===id);if(c)return c.name;}return id;};
+  const plan=[
+    ['2026-08',[1200,1300],[['rent',900],['food',520],['bills',180],['kid',200],['debt',200],['car',300],['net',90],['move',120],['out',250],['clothes',220]]],
+    ['2026-09',[3600,900,1300],[['rent',900],['food',610],['bills',210],['kid',230],['debt',200],['car',260],['net',90],['move',150],['out',300],['gifts',200]]],
+    ['2026-10',[2700,1500],[['rent',900],['food',430],['bills',170],['kid',150],['debt',200],['car',200],['net',90],['out',180]]]
+  ];
+  plan.forEach(([m,incs,exps],i)=>{
+    if(i===0){s.month=m;payShare(s);}
+    incs.forEach((amt,j)=>s.tx.push({id:uid(),t:'inc',amt,who:0,note:'',m,d:6+j*9}));
+    exps.forEach(([cat,amt],j)=>{const t={id:uid(),t:'exp',amt,cat,cname:nameOf(cat),layer:layerOf(cat),who:j%2,note:'',m,d:2+j*3};if(cat==='debt')t.debtId='d1';s.tx.push(t);});
+    if(i<plan.length-1)closeMonth(s);
+  });
+  return s;
+}
+function emptyState(prev){return {settings:prev?prev.settings:defaultSettings(),opening:0,month:thisMonth(),tx:[],isSample:false,plans:[],goals:[],debts:[],
+  fixed:((prev&&prev.fixed)||[]).map(f=>({id:f.id,cat:f.cat,amt:f.amt})),ritual:{},lastCount:null};}
+
+/* ---------- storage ---------- */
+const LIVE=!!document.querySelector('meta[name="budget-live"]');
+const LKEY='khazzan-live-v1', API='/api/state';
+const CFG_KEYS=['settings','opening','month','plans','goals','debts','fixed','ritual','lastCount','started'];
+let base=null;   // last state confirmed by the server: {rev, ids:[...], cfg:{key:json}}
+function normalize(s){
+  if(!s||!s.settings||!Array.isArray(s.tx)||!s.month)return null;
+  if(!s.settings.cats||!Array.isArray(s.plans)){if(s.isSample)return null;s.settings.cats=s.settings.cats||DEFAULT_CATS();s.plans=s.plans||[];s.goals=s.goals||[];s.debts=s.debts||[];}
+  if(!Array.isArray(s.goals))s.goals=[];if(!Array.isArray(s.debts))s.debts=[];
+  if(s.settings.expectedIncome==null)s.settings.expectedIncome=0;
+  if(s.settings.brake==null){s.settings.brake=1.5;delete s.settings.tMin;}
+  if(!s.settings.split||s.settings.split.proj!=null)s.settings.split={goals:90,fun:10};
+  if(!Array.isArray(s.fixed)){if(s.isSample)return null;s.fixed=[];}
+  if(!s.ritual)s.ritual={};
+  if(s.lastCount===undefined)s.lastCount=null;
+  return s;
+}
+function liveEmpty(){const e=emptyState(null);e.started=false;return e;}
+function load(){
+  try{const raw=localStorage.getItem(LIVE?LKEY:KEY);if(!raw)return null;let o=JSON.parse(raw);
+    if(LIVE){if(!o||!o.S)return null;base=o.base||null;o=o.S;}
+    return normalize(o);}catch(e){return null;}
+}
+function persistLocal(){try{localStorage.setItem(LIVE?LKEY:KEY,JSON.stringify(LIVE?{S,base}:S));}catch(e){}}
+function save(){persistLocal();if(LIVE)schedulePush();}
+
+let S=load()||(LIVE?liveEmpty():sample());
+
+/* ---------- sync with the shared copy (live version only) ---------- */
+const SYNC_LABEL={ok:'محفوظ عند الكل',pending:'يحفظ…',saving:'يحفظ…',offline:'بدون اتصال: محفوظ على الجهاز',auth:'لازم تسجيل دخول'};
+let syncState='ok', pushing=false, pushAgain=false, pushTimer=null, pulling=false, pendingRender=false;
+const getPass=()=>{try{return localStorage.getItem('kz-pass')||'';}catch(e){return '';}};
+const setPass=v=>{try{if(v)localStorage.setItem('kz-pass',v);else localStorage.removeItem('kz-pass');}catch(e){}};
+const getMe=()=>{try{const v=localStorage.getItem('kz-me');return v==null?null:Number(v);}catch(e){return null;}};
+const setMe=v=>{try{localStorage.setItem('kz-me',String(v));}catch(e){}};
+function setSync(st){syncState=st;const el=document.getElementById('syncDot');if(el){el.dataset.s=st;el.textContent=SYNC_LABEL[st];}}
+async function api(method,body,pass){
+  const r=await fetch(API,{method,headers:{'content-type':'application/json',authorization:'Bearer '+(pass||getPass())},body:body?JSON.stringify(body):undefined,cache:'no-store'});
+  if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e;}
+  return r.json();
+}
+const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+function snapshot(doc){const cfg={};for(const k of CFG_KEYS)cfg[k]=JSON.stringify((doc.cfg||{})[k]??null);return {rev:doc.rev||0,ids:(doc.tx||[]).map(t=>t.id),cfg};}
+function diff(){
+  const b=new Set(base.ids), cur=new Set(S.tx.map(t=>t.id));
+  const add=S.tx.filter(t=>!b.has(t.id)), del=base.ids.filter(id=>!cur.has(id)), cfg={};
+  for(const k of CFG_KEYS){const v=JSON.stringify(S[k]??null);if(v!==base.cfg[k])cfg[k]=S[k]??null;}
+  return {add,del,cfg,empty:!add.length&&!del.length&&!Object.keys(cfg).length};
+}
+// Combine the server copy with anything changed on this phone that the server has not seen yet.
+function mergeFromServer(doc){
+  const hasCfg=doc.cfg&&doc.cfg.settings;
+  if(!base){
+    if(hasCfg){const n=normalize(Object.assign({},clone(doc.cfg),{tx:clone(doc.tx)}));if(n)S=n;base=snapshot(doc);}
+    else base=snapshot({rev:doc.rev||0,tx:doc.tx||[],cfg:{}});
+    return;
+  }
+  if((doc.rev||0)<base.rev)return;   // an older answer that arrived late
+  const old=base, oldIds=new Set(old.ids), cur=new Set(S.tx.map(t=>t.id)), docIds=new Set(doc.tx.map(t=>t.id));
+  const deletedHere=new Set(old.ids.filter(id=>!cur.has(id)));
+  const newHere=S.tx.filter(t=>!oldIds.has(t.id)&&!docIds.has(t.id));
+  const next={tx:clone(doc.tx).filter(t=>!deletedHere.has(t.id)).concat(newHere)};
+  for(const k of CFG_KEYS){const local=JSON.stringify(S[k]??null);next[k]=local!==old.cfg[k]?S[k]:clone((doc.cfg||{})[k]);}
+  const n=normalize(next);if(n)S=n;
+  base=snapshot(doc);
+}
+function schedulePush(){if(!LIVE)return;clearTimeout(pushTimer);pushTimer=setTimeout(push,600);setSync('pending');}
+async function push(){
+  if(!LIVE||!getPass()||!base)return;
+  if(pushing){pushAgain=true;return;}
+  const d=diff();if(d.empty){setSync('ok');return;}
+  pushing=true;setSync('saving');
+  try{const doc=await api('POST',{add:d.add,del:d.del,cfg:d.cfg});mergeFromServer(doc);persistLocal();refreshUI();}
+  catch(e){pushing=false;if(e.status===401){setSync('auth');showGate();return;}setSync(e.status===409?'saving':'offline');clearTimeout(pushTimer);pushTimer=setTimeout(push,e.status===409?800:15000);return;}
+  pushing=false;
+  if(pushAgain||!diff().empty){pushAgain=false;push();}else setSync('ok');
+}
+async function pull(){
+  if(!LIVE||!getPass()||pulling||pushing)return;
+  pulling=true;
+  try{
+    const doc=await api('GET');
+    if(!base||doc.rev>base.rev){mergeFromServer(doc);persistLocal();refreshUI();}
+    catchUp();
+    if(!diff().empty)schedulePush();else if(syncState!=='pending')setSync('ok');
+  }catch(e){if(e.status===401){setSync('auth');showGate();}else setSync('offline');}
+  pulling=false;
+}
+// Close every month that has ended since the app was last opened.
+function catchUp(){
+  if(!LIVE||S.started===false)return;
+  let n=0;while(S.month<thisMonth()&&n<36){closeMonth(S);n++;}
+  if(n){ui.count=null;save();refreshUI(true);toast(n===1?`بدأ شهر ${monthLabel(S.month)}: باقي الشهر الماضي رجع للاحتياطي ونزلت الحصة الجديدة.`:`انقفلت ${n} شهور، والحين ${monthLabel(S.month)}.`);}
+}
+function busy(){const a=document.activeElement;return !$('#sheet').hidden||(a&&a.closest&&a.closest('#view')&&/INPUT|SELECT|TEXTAREA/.test(a.tagName));}
+function refreshUI(force){if(!force&&busy()){pendingRender=true;return;}pendingRender=false;rerenderKeepScroll();}
+function showGate(){$('#gate').hidden=false;$('#gateForm').hidden=false;$('#pickMe').hidden=true;setTimeout(()=>{try{$('#g-pass').focus();}catch(e){}},50);}
+function showPick(){
+  $('#gate').hidden=false;$('#gateForm').hidden=true;$('#pickMe').hidden=false;
+  $('#pickBtns').innerHTML=S.settings.members.map((n,i)=>`<button type="button" data-me="${i}"><span class="av a${i}">${esc((n||'؟')[0])}</span>${esc(n)}</button>`).join('');
+}
+
+const ui={tab:'home',confirmReset:false,resetTimer:null};
+let chartData=null;
+
+/* ---------- shared pieces ---------- */
+function header(title){
+  const m=S.settings.members;
+  return `<header class="top"><div><div class="eyebrow">${title}</div><h1>${monthLabel(S.month)}</h1>${LIVE?`<span class="sync" id="syncDot" data-s="${syncState}">${SYNC_LABEL[syncState]}</span>`:''}</div>
+    <div class="top-end"><div class="avatars" aria-label="${esc(m[0])} و${esc(m[1])}"><span class="av a0">${esc((m[0]||'؟')[0])}</span><span class="av a1">${esc((m[1]||'؟')[0])}</span></div>
+    <button type="button" class="gear" data-tab-go="set" aria-label="الإعدادات" aria-current="${ui.tab==='set'?'page':'false'}">${ICON.gear}</button></div></header>`;
+}
+function heroBlock(res,cov,mode,withRunway){
+  const st=S.settings, scale=Math.max(8,st.tMax+2), pct=x=>Math.max(0,Math.min(100,x/scale*100));
+  let runway='';
+  if(withRunway){const d=dryRun();runway=`<div class="runway"><span class="sub" style="color:inherit;opacity:.85">لو انقطع الإيراد، الحصة الكاملة مضمونة حتى</span><b class="num">${d.lastFull?monthLabel(d.lastFull):'أكثر من 3 سنين'}</b></div>`;}
+  return `<section class="hero ${cov<st.brake?'warn':''}">
+    <div class="row" style="align-items:flex-start"><div><div class="sub">رصيد الاحتياطي</div>
+      <div class="big">${fmt(res)} <span class="cur">د.ت</span></div></div>
+      <span class="pill">${MODE_LABEL[mode]}</span></div>
+    <div class="cov"><span class="num">${cov.toFixed(1)}</span><span>شهر مغطّى</span></div>
+    <div class="gauge" role="img" aria-label="التغطية ${cov.toFixed(1)} شهر، الترشيد تحت ${st.brake} والسقف ${st.tMax}">
+      <div class="zone" style="inset-inline-start:${pct(st.brake)}%;width:${pct(st.tMax)-pct(st.brake)}%"></div>
+      <div class="fill" style="width:${pct(cov)}%"></div></div>
+    <div class="legend sub"><span>0</span><span>ترشيد تحت ${st.brake} · سقف ${st.tMax} شهور</span><span>${scale}</span></div>
+    ${runway}
+  </section>`;
+}
+function banner(mode,cov){
+  if(mode==='austerity')return `<div class="banner warn">${ICON.alert}<div><b>وضع الترشيد</b><p>الاحتياطي يغطي ${cov.toFixed(1)} شهر، تحت ${S.settings.brake}. حصة الشهر تنزل بدون الطبقة المرنة لين يرجع الاحتياطي فوق الحد.</p></div></div>`;
+  return '';
+}
+function txRow(t,del){
+  const who=(t.who!=null&&S.settings.members[t.who])||'';
+  let title,meta,amt,cls='',av;
+  if(t.t==='exp'){
+    const d=t.debtId&&byId(S.debts,t.debtId);
+    title=esc(catName(t))+(d?' · '+esc(d.name):'')+(t.note?' · '+esc(t.note):'');meta=layerName(t.layer)+(who?' · '+esc(who):'');amt='-'+fmt(t.amt);av=`<span class="av a${t.who||0}">${esc((who||'؟')[0])}</span>`;}
+  else if(t.t==='inc'){title=t.note?esc(t.note):'إيراد';meta='راح للاحتياطي'+(who?' · '+esc(who):'');amt='+'+fmt(t.amt);cls='pos';av=`<span class="av a${t.who||0}">${esc((who||'؟')[0])}</span>`;}
+  else{cls='sys';av=`<span class="av sys">${ICON.tank}</span>`;
+    if(t.t==='salary'){title='حصة '+monthShort(t.m)+' نزلت من الاحتياطي';meta=SHARE_KIND[t.mode]||'';amt=fmt(t.amt);}
+    else if(t.t==='close'){title=t.amt>=0?'باقي الحصة رجع للاحتياطي':'تجاوز الحصة انخصم من الاحتياطي';meta='إقفال '+monthShort(t.m);amt=(t.amt>=0?'+':'')+fmt(t.amt);}
+    else if(t.t==='planned'){const p=byId(S.plans,t.planId);title='التزام: '+esc(p?p.name:t.pname||'');meta='من الاحتياطي';amt='-'+fmt(t.amt);}
+    else if(t.t==='debtx'){const d=byId(S.debts,t.debtId);title='دفعة إضافية: '+esc(d?d.name:'دين');meta='من الاحتياطي';amt='-'+fmt(t.amt);}
+    else if(t.t==='goalspend'){const g=byId(S.goals,t.goalId);title='تحقق هدف: '+esc(g?g.name:'');meta='من صندوق الأهداف';amt=fmt(t.amt);}
+    else if(t.t==='emerg'){title='طارئ'+(t.note?': '+esc(t.note):'');meta='من ظرف الاحتياطي'+(who?' · '+esc(who):'');amt='-'+fmt(t.amt);}
+    else if(t.t==='adj'){title='تسوية جرد: الاحتياطي';meta='بعد عدّ الظروف';amt=(t.amt>=0?'+':'')+fmt(t.amt);}
+    else if(t.t==='gadj'){title='تسوية جرد: الأهداف';meta='بعد عدّ الظروف';amt=(t.amt>=0?'+':'')+fmt(t.amt);}
+    else{title=t.manual?'تحويل يدوي للأهداف':'توزيع فايض: '+bucketName(t.to);meta='خرج من الاحتياطي';amt=fmt(t.amt);}}
+  const canDel=del&&['exp','inc','planned','debtx','emerg','adj','gadj'].includes(t.t)||(del&&t.t==='dist'&&t.manual);
+  const delBtn=canDel?`<button type="button" class="icon-btn" data-action="del" data-id="${t.id}" aria-label="حذف العملية">${ICON.x}</button>`:'';
+  return `<li class="tx ${cls}">${av}<div class="body"><span class="title">${title}</span><span class="meta">${meta}</span></div><span class="amt num">${amt}</span>${delBtn}</li>`;
+}
+function weeksStrip(wi){
+  return `<div class="weeks">${[1,2,3,4].map(w=>{const sp=wi.spent[w-1], pct=wi.weekly?Math.min(100,sp/wi.weekly*100):0, over=sp>wi.weekly+0.5;
+    return `<div class="wk ${w===wi.cw?'now':w<wi.cw?'past':''}"><span class="lab">أسبوع ${w}${w===wi.cw?' · الحين':''}</span><span class="v">${fmt(sp)}</span><div class="bar"><div style="width:${pct}%;background:${over?'var(--danger)':'var(--accent)'}"></div></div></div>`;}).join('')}</div>`;
+}
+function weekHeadline(wi){
+  const note=wi.carry>0.5?` · منها ${fmt(wi.carry)} وفر من الأسابيع اللي فاتت`:wi.carry<-0.5?` · بعد خصم تجاوز ${fmt(-wi.carry)} من قبل`:'';
+  return `<div class="week-big"><span class="num ${wi.left<0?'over':''}">${fmt(wi.left)}</span><span class="muted small">د.ت باقي في ظرف هالأسبوع${note}</span></div>`;
+}
+function monthOptions(sel){return MONTHS.map((n,i)=>`<option value="${i+1}"${sel===i+1?' selected':''}>${n}</option>`).join('');}
+function yearOptions(sel){const y=ym(S.month).y;let o='';for(let i=0;i<5;i++)o+=`<option value="${y+i}"${sel===y+i?' selected':''}>${y+i}</option>`;return o;}
+
+/* ---------- first use ---------- */
+function setupCard(){
+  const b=S.settings.budgets, m=S.settings.members;
+  return `<section class="card"><h2>نبدأ</h2><p class="small muted">ثلاث أشياء بس، والباقي تضيفونه بعدين من الإعدادات والخطة.</p>
+    <div class="field"><label for="su-open">1. كم عندكم الحين، كاش وفي الحسابات، غير مصروف هالشهر؟ (د.ت)</label><input class="num" id="su-open" type="number" inputmode="numeric" min="0" step="100" placeholder="مثلاً 9000"></div>
+    <div><p class="small" style="margin-bottom:6px">2. حصة البيت الشهرية حسب الطبقة</p><div class="fields">
+      ${LAYERS.map(l=>`<div class="field"><label for="su-${l.id}"><i class="dot" style="background:var(--l-${l.id})"></i>${l.name}</label><input class="num" id="su-${l.id}" type="number" inputmode="numeric" min="0" step="50" value="${b[l.id]}"></div>`).join('')}
+    </div><p class="hint">نصيحة المحاكاة: خلّوا الحصة حوالي 80٪ من متوسط دخلكم بعد الالتزامات.</p></div>
+    <div><p class="small" style="margin-bottom:6px">3. أسماءكم</p><div class="fields two">
+      <div class="field"><label for="su-m0">الأول</label><input id="su-m0" type="text" value="${esc(m[0])}"></div>
+      <div class="field"><label for="su-m1">الثاني</label><input id="su-m1" type="text" value="${esc(m[1])}"></div></div></div>
+    <p class="form-error" id="su-err" role="alert"></p>
+    <button type="button" class="btn block" data-action="start">ابدؤوا ${monthLabel(thisMonth())}</button>
+  </section>`;
+}
+
+/* ---------- home ---------- */
+function homeView(){
+  const res=reservoir(S), fs=fullShare(S), cov=fs?res/fs:0, mode=modeFor(S,res), st=stats(S,S.month), set=S.settings;
+  const plannedTotal=sum3(st.planned);
+  let h=header('ميزانية العائلة');
+  if(LIVE&&S.started===false)return h+setupCard();
+  if(S.isSample)h+=`<div class="banner info">${ICON.info}<div><p>الأرقام هنا أمثلة عشان تجرّب. سجّل عمليات، شوف تبويب الخطة، وانتقل للشهر الجاي. تمسحها من الإعدادات.</p></div></div>`;
+  h+=banner(mode,cov);
+  h+=heroBlock(res,cov,mode,true);
+  const due=dueNow();
+  if(due.length){
+    h+=`<section class="card"><h2>التزامات مستحقة</h2>${due.map(x=>`<div class="row"><div><b style="font-size:14px">${esc(x.p.name)}</b><p class="small ${x.n.overdue?'over':'muted'}">${x.n.overdue?'متأخر من '+monthLabel(x.n.occ):'مستحق هذا الشهر · من الاحتياطي'}</p></div>
+      <button type="button" class="btn small" data-action="pay-plan" data-id="${x.p.id}" data-occ="${x.n.occ}">ادفع ${fmt(x.p.amt)}</button></div>`).join('')}</section>`;
+  }
+  if(mode==='surplus'){
+    h+=`<section class="card"><div class="row"><div><h2>الاحتياطي فاض</h2><p class="small muted">${fmt(surplusOf(S))} د.ت فوق هدف ${set.tMax} شهور</p></div>
+      <button type="button" class="btn small" data-tab-go="env">وزّعه</button></div></section>`;
+  }
+  const wi=weekInfo();
+  const pending=(st.paid<plannedTotal-0.5)||wi.unpaid.length>0;
+  h+=`<section class="card"><div class="row"><div><h2>ظرف الأسبوع ${wi.cw}</h2><p class="small muted">${fmt(wi.weekly)} لكل أسبوع للمصروف المتغير</p></div><button type="button" class="link-btn" data-tab-go="env">الظروف</button></div>
+    ${weekHeadline(wi)}${weeksStrip(wi)}
+    ${pending?`<div class="banner warn">${ICON.alert}<div><p>باقي خطوات من روتين أول الشهر${wi.unpaid.length?`: ${wi.unpaid.length} مصاريف ثابتة ما تسجّلت`:''}.</p><button type="button" class="link-btn" style="padding:0;color:inherit;text-decoration:underline" data-tab-go="env">كمّلها من الظروف</button></div></div>`:''}
+  </section>`;
+  let shareExtra='';
+  if(st.paid<plannedTotal){
+    shareExtra=res>0
+      ?`<button type="button" class="btn small ghost" data-action="topup">كمّل حصة البيت من الاحتياطي (${fmt(Math.min(plannedTotal-st.paid,res))} د.ت)</button>`
+      :`<p class="small over">الاحتياطي فاضي: نزل ${fmt(st.paid)} من أصل ${fmt(plannedTotal)}.</p>`;
+  }
+  h+=`<section class="card salary"><div class="row"><div><h2>حصة البيت: ${monthShort(S.month)}</h2><p class="small muted">${SHARE_KIND[st.mode]}</p></div>
+      <span class="amount">${fmt(st.paid)} <span class="small muted">د.ت</span></span></div>
+      <div class="row small"><span class="muted">صرفتوا حتى الآن: <span class="num">${fmt(st.spentTotal)}</span></span>
+      ${st.left>=0?`<span>باقي <b class="num">${fmt(st.left)}</b></span>`:`<span class="over">تجاوزتوا بـ <span class="num">${fmt(-st.left)}</span></span>`}</div>
+      ${shareExtra}</section>`;
+  let layers='';
+  for(const l of LAYERS){
+    const p=st.planned[l.id], sp=st.spent[l.id], base=set.budgets[l.id];
+    if(p===0&&base>0){
+      layers+=`<div class="locked"><span>${ICON.lock}${l.name}: مجمّد هذا الشهر</span><span class="num ${sp>0?'over':''}">${fmt(sp)} / 0</span></div>`;continue;
+    }
+    const w=p>0?Math.min(100,sp/p*100):(sp>0?100:0), over=sp>p;
+    layers+=`<div class="layer"><div class="row"><span class="lname"><i class="dot" style="background:var(--l-${l.id})"></i>${l.name}${p<base?' <span class="tag warn">مخفّض</span>':''}</span>
+      <span class="num small ${over?'over':'muted'}">${fmt(sp)} / ${fmt(p)}</span></div>
+      <div class="bar"><div style="width:${w}%;background:${over?'var(--danger)':'var(--l-'+l.id+')'}"></div></div></div>`;
+  }
+  h+=`<section class="card"><div class="row"><h2>الطبقات هذا الشهر</h2><button type="button" class="link-btn" data-tab-go="set">تعديل</button></div>${layers}</section>`;
+  const recent=S.tx.filter(t=>t.t==='exp'||t.t==='inc').slice(-4).reverse();
+  h+=`<section style="display:flex;flex-direction:column;gap:8px"><div class="row" style="padding:0 4px"><h2 style="font-size:15px">آخر العمليات</h2><button type="button" class="link-btn" data-tab-go="tx">الكل</button></div>
+    ${recent.length?`<ul class="txlist">${recent.map(t=>txRow(t,false)).join('')}</ul>`:`<p class="small muted" style="padding:0 4px">ما فيه عمليات بعد. اضغط + وسجّل أول مصروف أو إيراد.</p>`}</section>`;
+  if(!LIVE)h+=`<section class="card sim"><h2>جرّب الأشهر</h2><p class="small muted">يقفل ${monthShort(S.month)}، يرجّع باقي الحصة للاحتياطي، وينزّل حصة ${monthShort(nextMonth(S.month))} حسب حالة الاحتياطي.</p>
+    <button type="button" class="btn ghost block" data-action="advance">انتقل لـ ${monthLabel(nextMonth(S.month))}</button></section>`;
+  return h;
+}
+
+/* ---------- transactions ---------- */
+function txView(){
+  let h=header('كل العمليات');
+  const months=[...new Set(S.tx.map(t=>t.m))].sort().reverse();
+  if(!months.length)return h+`<p class="muted">ما فيه عمليات بعد.</p>`;
+  for(const m of months){
+    const list=S.tx.filter(t=>t.m===m);
+    const sumT=ty=>list.filter(t=>ty.includes(t.t)).reduce((a,t)=>a+t.amt,0);
+    const inc=sumT(['inc']), exp=sumT(['exp']), big=sumT(['emerg','planned','debtx']);
+    h+=`<div class="month-head"><b>${monthLabel(m)}</b><span class="muted">إيراد <span class="num">${fmt(inc)}</span> · مصروف <span class="num">${fmt(exp)}</span>${big?` · التزامات وطوارئ <span class="num">${fmt(big)}</span>`:''}</span></div>
+      <ul class="txlist">${list.slice().reverse().map(t=>txRow(t,true)).join('')}</ul>`;
+  }
+  return h;
+}
+
+/* ---------- plan ---------- */
+function niceStep(range){const raw=range/4;const p=Math.pow(10,Math.floor(Math.log10(raw||1)));const n=raw/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;}
+function chartSVG(series,fs){
+  const st=S.settings, W=360, H=210, ml=40, mr=58, mt=10, mb=24, pw=W-ml-mr, ph=H-mt-mb;
+  let lo=0, hi=st.tMax*fs*1.08;
+  series.forEach(s=>s.pts.forEach(p=>{lo=Math.min(lo,p.res);hi=Math.max(hi,p.res);}));
+  const step=niceStep(hi-lo);lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
+  const n=series[0].pts.length-1, x=i=>ml+i*pw/n, y=v=>mt+(hi-v)/(hi-lo)*ph;
+  let g='';
+  // bands
+  const bTop=y(Math.min(hi,st.tMax*fs)), bBot=y(Math.max(lo,st.brake*fs));
+  g+=`<rect class="band-safe" x="${ml}" y="${bTop}" width="${pw}" height="${Math.max(0,bBot-bTop)}"/>`;
+  g+=`<text class="band-lab" x="${ml+4}" y="${bTop+11}" text-anchor="start">منطقة الأمان</text>`;
+  const lTop=y(Math.min(hi,st.brake*fs)), lBot=y(Math.max(lo,0));
+  g+=`<rect class="band-low" x="${ml}" y="${lTop}" width="${pw}" height="${Math.max(0,lBot-lTop)}"/>`;
+  g+=`<text class="band-lab" x="${ml+4}" y="${lBot-4}" text-anchor="start">ترشيد</text>`;
+  // grid + y labels
+  for(let v=lo;v<=hi+0.1;v+=step){g+=`<line class="gridl" x1="${ml}" x2="${ml+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${ml-6}" y="${y(v)+3}" text-anchor="end">${fmtK(v)}</text>`;}
+  // x labels
+  series[0].pts.forEach((p,i)=>{if(i%3===0)g+=`<text class="ax" x="${x(i)}" y="${H-6}" text-anchor="middle">${i===0?'الآن':monthShort(p.m)}</text>`;});
+  // lines
+  series.forEach(s=>{g+=`<path class="ln ${s.cls}" d="${s.pts.map((p,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(p.res).toFixed(1)).join(' ')}"/>`;});
+  // end labels, pushed apart to avoid overlap
+  const ends=series.map(s=>({cls:s.cls,v:s.pts[n].res,yy:y(s.pts[n].res)})).sort((a,b)=>a.yy-b.yy);
+  for(let i=1;i<ends.length;i++)if(ends[i].yy-ends[i-1].yy<13)ends[i].yy=ends[i-1].yy+13;
+  ends.forEach(e=>{g+=`<circle cx="${x(n)}" cy="${y(e.v)}" r="3.5" style="fill:var(--c-${e.cls});stroke:var(--surface);stroke-width:2"/><text class="endlab" x="${x(n)+8}" y="${e.yy+3.5}" text-anchor="start">${fmtK(e.v)}</text>`;});
+  g+=`<line id="cross" class="cross" x1="0" x2="0" y1="${mt}" y2="${mt+ph}" visibility="hidden"/>`;
+  g+=`<rect id="hit" x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="transparent"/>`;
+  chartData={series,ml,pw,n,W};
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="توقّع رصيد الاحتياطي لـ ${n} شهر بثلاث حالات للإيراد">${g}</svg>`;
+}
+function bindChart(){
+  const wrap=$('#chartWrap');if(!wrap||!chartData)return;
+  const svg=wrap.querySelector('svg'), tip=$('#chartTip'), cross=svg.querySelector('#cross');
+  const show=ev=>{
+    const r=svg.getBoundingClientRect(), sx=(ev.clientX-r.left)/r.width*chartData.W;
+    const i=Math.max(0,Math.min(chartData.n,Math.round((sx-chartData.ml)/chartData.pw*chartData.n)));
+    const px=chartData.ml+i*chartData.pw/chartData.n;
+    cross.setAttribute('x1',px);cross.setAttribute('x2',px);cross.setAttribute('visibility','visible');
+    const p0=chartData.series[0].pts[i];
+    tip.innerHTML=`<b>${i===0?'الآن':monthLabel(p0.m)}</b>`+chartData.series.map(s=>`<div class="t-row"><span><i style="background:var(--c-${s.cls})"></i>${s.short}</span><span class="num">${fmt(s.pts[i].res)}</span></div>`).join('')+(p0.out?`<div class="t-row"><span>التزامات</span><span class="num">-${fmt(p0.out)}</span></div>`:'');
+    tip.hidden=false;
+    const left=px/chartData.W*r.width, tw=tip.offsetWidth;
+    tip.style.left=Math.max(0,Math.min(r.width-tw,left-tw/2))+'px';
+  };
+  const hide=()=>{tip.hidden=true;cross.setAttribute('visibility','hidden');};
+  svg.addEventListener('pointermove',show);svg.addEventListener('pointerdown',show);svg.addEventListener('pointerleave',hide);
+}
+
+function planView(){
+  const set=S.settings, fs=fullShare(S), res=reservoir(S), hist=incomeHistory(), exp=expectedIncome();
+  const prov=provision(), gNeed=goalsMonthlyNeed();
+  const gIncome=gNeed>0&&set.split.goals>0?gNeed*100/set.split.goals:0;
+  const required=fs+prov.total+gIncome, gap=exp-required;
+  let h=header('الخطة المالية');
+
+  // 1. what income the plan needs
+  h+=`<section class="card"><h2>الإيراد اللي تحتاجه الخطة شهرياً</h2>
+    <div class="need-big"><span class="num">${fmt(required)}</span><span class="muted">د.ت بالمتوسط</span></div>
+    <div class="breakdown">
+      <div class="row"><span>حصة البيت</span><span class="num">${fmt(fs)}</span></div>
+      ${prov.total>0?`<div class="row"><span>مخصص الالتزامات القادمة <span class="muted small">(÷12)</span></span><span class="num">${fmt(prov.total)}</span></div>`:''}
+      ${gIncome>0?`<div class="row"><span>الأهداف في وقتها <span class="muted small">(من الفايض)</span></span><span class="num">${fmt(gIncome)}</span></div>`:''}
+      <div class="row total"><span>متوسط إيرادكم ${set.expectedIncome>0?'(اللي حددتوه)':hist.n?`(آخر ${hist.n} ${hist.n===1?'شهر':'شهور'})`:''}</span><span class="num">${fmt(exp)}</span></div>
+    </div>
+    ${exp<=0?`<div class="banner info">${ICON.info}<p>ما فيه إيراد مسجّل بعد. سجّلوا إيراداتكم أو اكتبوا الإيراد المتوقع تحت عشان تكتمل المقارنة.</p></div>`
+      :gap>=0?`<div class="banner info">${ICON.ok}<div><b>إيرادكم يغطي الخطة</b><p>يزيد ${fmt(gap)} د.ت شهرياً بالمتوسط. الزايد يعبّي الاحتياطي ثم يتوزع فايض.</p></div></div>`
+      :`<div class="banner warn">${ICON.alert}<div><b>ناقص ${fmt(-gap)} د.ت شهرياً</b><p>الخيارات: خفّضوا حصة البيت، أجّلوا هدف، أو مدّوا موعد الالتزامات. وإلا الاحتياطي بينزل مع الوقت.</p></div></div>`}
+  </section>`;
+
+  // 2. dry-month test
+  const d=dryRun();
+  h+=`<section class="card"><h2>اختبار الشهور الجافة</h2><p class="small muted">لو ما دخل ولا دينار من الحين، مع الالتزامات المخططة:</p>
+    <ul class="dry">
+      <li><span>الحصة الكاملة مضمونة حتى</span><b>${d.lastFull?monthLabel(d.lastFull):'أكثر من 3 سنين'}</b></li>
+      <li><span>الترشيد يبدأ في</span><b>${d.firstAust?monthLabel(d.firstAust.m):'ما يبدأ خلال 3 سنين'}</b></li>
+      <li><span>الاحتياطي ما يكفي الحصة في</span><b class="${d.firstShort?'over':''}">${d.firstShort?monthLabel(d.firstShort.m):'ما يصير خلال 3 سنين'}</b></li>
+    </ul></section>`;
+
+  // 3. projection
+  const N=12, sExp=simulate(exp,N), sCons=simulate(Math.round(exp/2),N), sNone=simulate(0,N);
+  const series=[{cls:'exp',name:'بالمتوسط',short:'المتوسط',pts:sExp},{cls:'cons',name:'متحفظ: نص المتوسط',short:'متحفظ',pts:sCons},{cls:'none',name:'بدون إيراد',short:'بدون',pts:sNone}];
+  h+=`<section class="card"><h2>توقّع الاحتياطي لـ 12 شهر</h2>
+    <div class="chart-legend">${series.map(s=>`<span><i class="sw ${s.cls}"></i>${s.name}${s.cls!=='none'?` <span class="num">(${fmt(s.cls==='exp'?exp:Math.round(exp/2))})</span>`:''}</span>`).join('')}</div>
+    <div class="chart-wrap" id="chartWrap" dir="ltr">${chartSVG(series,fs)}<div class="tip" id="chartTip" dir="rtl" hidden></div></div>
+    <p class="hint">المسار يطبّق نفس القواعد: ترشيد تحت ${set.brake} شهر، والفايض فوق ${set.tMax} شهور يتوزع. المس الرسم وشوف أي شهر.</p>
+    <div class="field"><label for="expInc">الإيراد المتوقع شهرياً (فاضي = متوسطكم الفعلي)</label><input class="num" id="expInc" data-set="expected" type="number" inputmode="numeric" min="0" step="100" value="${set.expectedIncome||''}" placeholder="${fmt(hist.avg)}"></div>
+    <details class="more"><summary>عرض كجدول</summary><div class="table-wrap"><table><thead><tr><th>الشهر</th>${series.map(s=>`<th>${s.short}</th>`).join('')}<th>التزامات</th></tr></thead><tbody>
+      ${sExp.map((p,i)=>`<tr><td>${i===0?'الآن':monthLabel(p.m)}</td>${series.map(s=>`<td class="num">${fmt(s.pts[i].res)}</td>`).join('')}<td class="num">${p.out?'-'+fmt(p.out):''}</td></tr>`).join('')}
+    </tbody></table></div></details>
+  </section>`;
+
+  // 4. planned obligations
+  const plans=S.plans.map(p=>({p,n:planNext(p)})).filter(x=>x.n).sort((a,b)=>a.n.occ<b.n.occ?-1:1);
+  const done=S.plans.filter(p=>!planNext(p));
+  h+=`<div class="section-title"><h2>الالتزامات القادمة</h2>${prov.total>0?`<span class="small muted">تحتاج <span class="num">${fmt(prov.total)}</span> شهرياً</span>`:''}</div>
+  <section class="card"><p class="hint">مصاريف كبيرة معروفة مسبقاً: مدرسة، تأمين، رمضان، عيد، سفر. تندفع من الاحتياطي، مو من حصة الشهر، والتوقع يحسب حسابها.</p>
+    ${plans.length?plans.map(({p,n})=>{const mo=monthsBetween(S.month,n.occ);return `<div class="item"><div class="row top-align"><div style="min-width:0"><div class="name">${esc(p.name)}</div>
+      <div class="meta">${p.yearly?'كل سنة في '+MONTHS[p.mm-1]:'مرة وحدة: '+monthLabel(planStart(p))} · ${n.overdue?'<span class="over">متأخر</span>':inMonths(mo)}</div></div>
+      <div class="item-actions"><span class="amt">${fmt(p.amt)}</span><button type="button" class="icon-btn" data-action="del-plan" data-id="${p.id}" aria-label="حذف ${esc(p.name)}">${ICON.trash}</button></div></div></div>`;}).join('')
+      :`<p class="empty">ما فيه التزامات. أضيفوا أول واحد تحت.</p>`}
+    ${done.length?`<p class="hint">انتهت: ${done.map(p=>esc(p.name)).join('، ')}</p>`:''}
+    <details class="adder"><summary>+ إضافة التزام</summary><div class="adder-body">
+      <div class="field"><label for="np-name">الاسم</label><input id="np-name" type="text" placeholder="مثلاً: رسوم المدرسة" maxlength="30"></div>
+      <div class="fields"><div class="field"><label for="np-amt">المبلغ</label><input class="num" id="np-amt" type="number" inputmode="numeric" min="0" step="50"></div>
+        <div class="field"><label for="np-mm">الشهر</label><select id="np-mm">${monthOptions(ym(nextMonth(S.month)).mm)}</select></div>
+        <div class="field"><label for="np-yy">السنة</label><select id="np-yy">${yearOptions(ym(nextMonth(S.month)).y)}</select></div></div>
+      <label class="check"><input type="checkbox" id="np-yearly" checked> يتكرر كل سنة</label>
+      <p class="form-error" id="np-err" role="alert"></p>
+      <button type="button" class="btn" data-action="add-plan">إضافة</button></div></details>
+  </section>`;
+
+  // 5. goals
+  const al=goalAlloc(), pool=goalsPool(), active=S.goals.filter(g=>!g.done), doneGoals=S.goals.filter(g=>g.done);
+  const sGoal=simulate(exp,48);let cum=0;
+  const eta={};for(const g of active){cum+=g.target;const needIn=cum-Math.max(0,pool);if(needIn<=0){eta[g.id]=S.month;continue;}const hit=sGoal.find(p=>p.goalsIn>=needIn);eta[g.id]=hit?hit.m:null;}
+  h+=`<div class="section-title"><h2>الأهداف</h2><span class="small muted">في الصندوق <span class="num">${fmt(pool)}</span></span></div>
+  <section class="card"><p class="hint">للأشياء الكبيرة اللي تنجمع على وقت: مقدّم سيارة، بيت، تعليم. تتعبّى من الفايض بالترتيب، الأول يكمل قبل اللي بعده. والمصاريف اللي تتكرر كل سنة، مثل السفرة والعيد، حطوها في الالتزامات.</p>
+    ${active.length?active.map((g,i)=>{const a=al.m[g.id]||0, pct=g.target?Math.min(100,a/g.target*100):0, due=g.yy?mkey(g.yy,g.mm):null, e=eta[g.id];
+      const late=due&&(!e||e>due), monthsLeft=due?Math.max(1,monthsBetween(S.month,due)):0, perMonth=due?Math.max(0,g.target-a)/monthsLeft:0;
+      return `<div class="item"><div class="row top-align"><div style="min-width:0"><div class="name">${esc(g.name)}</div>
+        <div class="meta">${due?'الموعد: '+monthLabel(due)+' · يحتاج '+fmt(perMonth)+' شهرياً':'بدون موعد'}</div></div>
+        <span class="amt">${fmt(a)} <span class="muted small">/ ${fmt(g.target)}</span></span></div>
+        <div class="bar"><div style="width:${pct}%;background:var(--accent)"></div></div>
+        <div class="row"><span class="small">${a>=g.target?'<span class="tag ok">جاهز</span>':e?`<span class="muted">بالمتوسط توصلون له: </span><b class="num">${monthLabel(e)}</b> ${due?(late?'<span class="tag bad">بعد الموعد</span>':'<span class="tag ok">قبل الموعد</span>'):''}`:'<span class="tag bad">ما يتحقق خلال 4 سنين بالمتوسط</span>'}</span>
+          <span class="item-actions">
+            <button type="button" class="icon-btn" data-action="goal-up" data-id="${g.id}" aria-label="ارفع الأولوية" ${i===0?'disabled':''}>${ICON.up}</button>
+            <button type="button" class="icon-btn" data-action="goal-down" data-id="${g.id}" aria-label="نزّل الأولوية" ${i===active.length-1?'disabled':''}>${ICON.down}</button>
+            <button type="button" class="icon-btn" data-action="del-goal" data-id="${g.id}" aria-label="حذف ${esc(g.name)}">${ICON.trash}</button></span></div>
+        ${a>=g.target?`<button type="button" class="btn small" data-action="goal-done" data-id="${g.id}">حققناه: اصرف ${fmt(g.target)} من الصندوق</button>`:''}
+      </div>`;}).join('')
+      :`<p class="empty">ما فيه أهداف. أضيفوا أول هدف تحت.</p>`}
+    ${doneGoals.length?`<p class="hint">تحققت: ${doneGoals.map(g=>esc(g.name)).join('، ')}</p>`:''}
+    <details class="adder"><summary>تحويل يدوي من الاحتياطي للأهداف</summary><div class="adder-body">
+      <p class="hint">استخدموه بحذر: كل دينار تحوّلونه ينقص من أمان الاحتياطي. حالياً يغطي ${fs?(res/fs).toFixed(1):0} شهر.</p>
+      <div class="add-cat"><input class="num" id="gt-amt" type="number" inputmode="numeric" min="0" step="100" placeholder="المبلغ" aria-label="مبلغ التحويل"><button type="button" class="btn small" data-action="goal-transfer">حوّل</button></div></div></details>
+    <details class="adder"><summary>+ إضافة هدف</summary><div class="adder-body">
+      <div class="field"><label for="ng-name">الهدف</label><input id="ng-name" type="text" placeholder="مثلاً: مقدّم سيارة" maxlength="30"></div>
+      <div class="fields"><div class="field"><label for="ng-amt">المبلغ</label><input class="num" id="ng-amt" type="number" inputmode="numeric" min="0" step="100"></div>
+        <div class="field"><label for="ng-mm">شهر الموعد</label><select id="ng-mm"><option value="0">بدون</option>${monthOptions(0)}</select></div>
+        <div class="field"><label for="ng-yy">السنة</label><select id="ng-yy">${yearOptions(ym(S.month).y+1)}</select></div></div>
+      <p class="form-error" id="ng-err" role="alert"></p>
+      <button type="button" class="btn" data-action="add-goal">إضافة</button></div></details>
+  </section>`;
+
+  // 6. debts
+  const debts=S.debts.map(dd=>({d:dd,left:debtLeft(dd)})).sort((a,b)=>(a.left===0)-(b.left===0)||a.left-b.left);
+  const totalLeft=debts.reduce((a,x)=>a+x.left,0), totalInst=debts.filter(x=>x.left>0).reduce((a,x)=>a+x.d.inst,0);
+  const freeMonth=debts.filter(x=>x.left>0).reduce((m,x)=>{const k=addMonths(S.month,Math.ceil(x.left/Math.max(1,x.d.inst)));return k>m?k:m;},'');
+  h+=`<div class="section-title"><h2>الديون</h2>${totalLeft>0?`<span class="small muted">باقي <span class="num">${fmt(totalLeft)}</span></span>`:''}</div>
+  <section class="card">
+    ${totalLeft>0?`<div class="row small"><span class="muted">أقساط شهرية <span class="num">${fmt(totalInst)}</span> من حصة الأساسي</span><span>بدون ديون في <b class="num">${monthLabel(freeMonth)}</b></span></div>
+      <p class="hint">مرتّبة من الأصغر. لما يجيكم فايض، سدّدوا الأصغر أول عشان يتحرر قسطه بسرعة.</p>`:''}
+    ${debts.length?debts.map(({d:dd,left})=>{const paid=dd.amount-left, pct=dd.amount?Math.min(100,paid/dd.amount*100):0, months=left>0?Math.ceil(left/Math.max(1,dd.inst)):0;
+      return `<div class="item"><div class="row top-align"><div style="min-width:0"><div class="name">${esc(dd.name)}</div>
+        <div class="meta">${left>0?'قسط '+fmt(dd.inst)+' · يخلص '+monthLabel(addMonths(S.month,months)):'<span class="tag ok">انتهى</span> تحرر قسط '+fmt(dd.inst)+' شهرياً. خفّضوا حصة الأساسي أو خلّوه يروح للفايض.'}</div></div>
+        <span class="amt">${fmt(left)} <span class="muted small">باقي</span></span></div>
+        <div class="bar"><div style="width:${pct}%;background:var(--accent)"></div></div>
+        <div class="row"><span class="small muted">سدّدتوا ${fmt(paid)} من ${fmt(dd.amount)}</span>
+          <button type="button" class="icon-btn" data-action="del-debt" data-id="${dd.id}" aria-label="حذف ${esc(dd.name)}">${ICON.trash}</button></div>
+        ${left>0?`<div class="btn-row">${S.tx.some(t=>t.t==='exp'&&t.m===S.month&&t.debtId===dd.id)?'<span class="tag ok" style="align-self:center">قسط الشهر مسجّل</span>':`<button type="button" class="btn small" data-action="debt-inst" data-id="${dd.id}">سجّل قسط الشهر</button>`}<button type="button" class="btn small ghost" data-action="debt-extra" data-id="${dd.id}">قسط إضافي من الاحتياطي</button></div>`:''}
+      </div>`;}).join('')
+      :`<p class="empty">ما فيه ديون مسجّلة.</p>`}
+    <details class="adder"><summary>+ إضافة دين</summary><div class="adder-body">
+      <div class="field"><label for="nd-name">الاسم</label><input id="nd-name" type="text" placeholder="مثلاً: قرض البنك" maxlength="30"></div>
+      <div class="fields two"><div class="field"><label for="nd-amt">المبلغ الباقي</label><input class="num" id="nd-amt" type="number" inputmode="numeric" min="0" step="100"></div>
+        <div class="field"><label for="nd-inst">القسط الشهري</label><input class="num" id="nd-inst" type="number" inputmode="numeric" min="0" step="50"></div></div>
+      <p class="form-error" id="nd-err" role="alert"></p>
+      <button type="button" class="btn" data-action="add-debt">إضافة</button></div></details>
+  </section>`;
+  return h;
+}
+
+/* ---------- envelopes ---------- */
+const ICON_TANK20='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>';
+function step(n,done,title,body){return `<li class="step ${done?'done':''}"><span class="mark">${done?ICON.ok:n}</span><div class="txt"><b>${title}</b>${body}</div></li>`;}
+function envView(){
+  const res=reservoir(S), fs=fullShare(S), set=S.settings, sur=surplusOf(S), b=buckets(S), wi=weekInfo(), st=wi.st;
+  const plannedTotal=sum3(st.planned), hc=houseCash(), goalsTotal=bucketsTotal(b), cashCap=fs, r=ritual(), due=dueNow();
+  let h=header('الظروف');
+
+  h+=`<section class="envs" aria-label="الظروف">
+    <div class="env ${hc<0?'warn':''}"><span class="ico">${ICON.home}</span><div class="body"><b>ظرف البيت</b><span>الباقي من حصة ${monthShort(S.month)}</span></div><span class="amt ${hc<0?'over':''}">${fmt(hc)}</span></div>
+    <div class="env"><span class="ico">${ICON_TANK20}</span><div class="body"><b>ظرف الاحتياطي</b><span>${res>cashCap?`${fmt(cashCap)} كاش · ${fmt(res-cashCap)} في حساب الادخار`:'كله كاش في الظرف'}</span></div><span class="amt">${fmt(res)}</span></div>
+    <div class="env"><span class="ico">${ICON.star}</span><div class="body"><b>ظرف الأهداف</b><span>${goalsTotal>0?`أهداف ${fmt(b.goals)} · متعة ${fmt(b.fun)}`:'يتعبّى من الفايض'}</span></div><span class="amt">${fmt(goalsTotal)}</span></div>
+  </section>`;
+
+  h+=`<section class="card"><h2>ظروف الأسابيع</h2>
+    <p class="small muted">${st.paid>0?`حصة الشهر ${fmt(st.paid)}، ناقص الثابتة ${fmt(wi.fixedTotal)}، يبقى ${fmt(wi.varBudget)} للمصروف المتغير: <b class="num" style="color:var(--fg)">${fmt(wi.weekly)}</b> لكل أسبوع.`:'حصة الشهر ما انتقلت لظرف البيت بعد.'}</p>
+    ${weekHeadline(wi)}${weeksStrip(wi)}
+    <p class="hint">الأسبوع الأول من 1 لـ 7، والرابع من 22 لآخر الشهر. الوفر ينتقل للأسبوع اللي بعده تلقائياً.</p></section>`;
+
+  const s1=st.paid>=plannedTotal-0.5, s2=!wi.unpaid.length, s3=!!r.split;
+  const unpaidSum=wi.unpaid.reduce((a,f)=>a+f.amt,0);
+  h+=`<section class="card"><h2>روتين أول الشهر</h2><ol class="steps">
+    ${step(1,s1,'انقلوا حصة الشهر لظرف البيت',`<p>${fmt(plannedTotal)} د.ت من ظرف الاحتياطي${st.mode==='austerity'?' (حصة مرشّدة هالشهر)':''}.</p>${!s1&&res>0?`<button type="button" class="btn small" data-action="topup">نقلناها: سجّل ${fmt(Math.min(plannedTotal-st.paid,res))}</button>`:''}`)}
+    ${step(2,s2&&S.fixed.length>0,'ادفعوا المصاريف الثابتة',S.fixed.length?(s2?`<p>كلها مدفوعة هالشهر.</p>`:`<p>${wi.unpaid.map(f=>esc((findCat(f.cat)||{name:'بند'}).name)+' '+fmt(f.amt)).join('، ')}</p><button type="button" class="btn small" data-action="pay-fixed">دفعناها: سجّلها (${fmt(unpaidSum)})</button>`):`<p>ما حددتوا مصاريف ثابتة. <button type="button" class="link-btn" style="padding:0" data-tab-go="set">أضيفوها من الإعدادات</button></p>`)}
+    ${step(3,s3,'قسّموا الباقي على 4 أظرف أسبوعية',`<p>${fmt(wi.weekly)} د.ت في كل ظرف.</p><button type="button" class="btn small ${s3?'ghost':''}" data-action="ritual-split">${s3?'تراجع':'قسّمناها'}</button>`)}
+    ${due.length?step(4,false,'ادفعوا الالتزامات المستحقة من ظرف الاحتياطي',due.map(x=>`<div class="row"><span class="small">${esc(x.p.name)}${x.n.overdue?' <span class="over">متأخر</span>':''}</span><button type="button" class="btn small" data-action="pay-plan" data-id="${x.p.id}" data-occ="${x.n.occ}">ادفع ${fmt(x.p.amt)}</button></div>`).join('')):''}
+  </ol></section>`;
+
+  if(sur>0){
+    const rows=BUCKETS.map(([k,n])=>{const a=Math.round(sur*set.split[k]/100);return `<div class="alloc"><div class="row small"><span>${n}</span><span><span class="muted">${set.split[k]}٪</span> <b class="num">${fmt(a)}</b></span></div><div class="bar"><div style="width:${set.split[k]}%;background:var(--accent)"></div></div></div>`;}).join('');
+    h+=`<section class="card"><h2>الاحتياطي فاض: <span class="num">${fmt(sur)}</span> د.ت</h2>${rows}<button type="button" class="btn block" data-action="distribute">وزّع الفايض</button><p class="hint">انقلوا المبالغ من ظرف الاحتياطي لظرف الأهداف، وبعدها اضغطوا وزّع.</p></section>`;
+  }
+
+  const counted=S.lastCount&&S.lastCount.m===S.month;
+  h+=`<section class="card"><h2>روتين آخر الشهر</h2><ol class="steps">
+    ${step(1,false,'رجّعوا باقي ظرف البيت لظرف الاحتياطي',hc>=0?`<p>${fmt(hc)} د.ت. يتسجل تلقائي لما تقفلون الشهر.</p>`:`<p class="over">تجاوزتوا ${fmt(-hc)} د.ت، وبينخصم من الاحتياطي.</p>`)}
+    ${step(2,counted,'عدّوا الظروف وقارنوها',`<p>من الجرد تحت.</p>`)}
+    ${LIVE?step(3,false,'الشهر يتقفل لحاله',`<p>أول يوم في ${monthLabel(nextMonth(S.month))} يرجع الباقي للاحتياطي وتنزل الحصة الجديدة تلقائياً.</p>`):step(3,false,'اقفلوا الشهر',`<button type="button" class="btn small ghost" data-action="advance">اقفل ${monthShort(S.month)} وابدأ ${monthLabel(nextMonth(S.month))}</button>`)}
+  </ol></section>`;
+
+  const c=ui.count||{vals:{}}, v=c.vals;
+  const fld=(id,lab)=>`<div class="field"><label for="${id}">${lab}</label><input class="num" id="${id}" data-count="${id}" type="number" inputmode="decimal" min="0" value="${v[id]!=null?v[id]:''}"></div>`;
+  let results='';
+  if(c.rows){
+    results=`<div class="count-res">${c.rows.map(rw=>{
+      if(Math.abs(rw.diff)<0.5)return `<div class="count-row ok"><span>${rw.label}: مطابق</span>${ICON.ok}</div>`;
+      const msg=rw.key==='house'?(rw.diff<0?`ناقص ${fmt(-rw.diff)}: غالباً مصروف ما تسجّل`:`زايد ${fmt(rw.diff)}: يمكن مصروف تسجّل مرتين`):`${rw.diff<0?'ناقص':'زايد'} ${fmt(Math.abs(rw.diff))} عن المسجّل`;
+      const fixLab=rw.key==='house'&&rw.diff<0?'سجّله مصروف':'اعتمد المعدود';
+      return `<div class="count-row off"><span>${rw.label}: ${msg}</span><button type="button" class="btn small ghost" data-action="count-fix" data-key="${rw.key}">${fixLab}</button></div>`;}).join('')}
+      ${c.tooMuchCash>0?`<div class="banner info">${ICON.info}<p>الكاش في ظرف الاحتياطي فوق حصة شهر. حطوا ${fmt(c.tooMuchCash)} في حساب الادخار.</p></div>`:''}</div>`;
+  }
+  h+=`<section class="card"><h2>جرد الظروف</h2><p class="hint">عدّوا الكاش واكتبوا رصيد الحسابات. اللي ما تعدّونه خلوه فاضي.</p>
+    <div class="fields two">${fld('c-house','كاش في ظرف البيت')}${fld('c-rcash','كاش في ظرف الاحتياطي')}${fld('c-rbank','حساب الادخار (الاحتياطي)')}${fld('c-goals','الأهداف (ظرف أو حساب)')}</div>
+    <button type="button" class="btn" data-action="count">قارن بالمسجّل</button>${results}
+    ${S.lastCount?`<p class="hint">آخر جرد: ${S.lastCount.d} ${monthLabel(S.lastCount.m)}</p>`:''}</section>`;
+
+  h+=`<section class="card"><h2>قواعدنا</h2><ol class="rules">
+    <li>أي إيراد يدخل ظرف الاحتياطي أول، قبل ما ينصرف منه شي.</li>
+    <li>ظرف الاحتياطي ما ينفتح إلا لثلاث: حصة الشهر، الالتزامات المخططة، والطوارئ الحقيقية.</li>
+    <li>مصاريف الشهر كلها من ظرف البيت بس.</li>
+    <li>الثابتة تندفع أول الشهر، والباقي يتقسم على 4 أظرف أسبوعية.</li>
+    <li>خلص ظرف الأسبوع؟ خذوا من ظرف الأسبوع الجاي، مو من الاحتياطي.</li>
+    <li>آخر الشهر: باقي ظرف البيت يرجع للاحتياطي، ونعدّ الظروف.</li>
+    <li>الكاش في البيت ما يتعدى حصة شهر. الباقي في حساب ادخار.</li>
+    <li>كل عملية تتسجل في نفس اليوم، من اللي صرفها.</li>
+  </ol></section>`;
+
+  const months=[...new Set(S.tx.map(t=>t.m))].sort();
+  let run=S.opening, rows='';
+  for(const m of months){
+    let inc=0,sal=0,close=0,dist=0,obl=0;
+    for(const t of S.tx){if(t.m!==m)continue;if(t.t==='inc')inc+=t.amt;else if(t.t==='salary')sal+=t.amt;else if(t.t==='close')close+=t.amt;else if(t.t==='dist')dist+=t.amt;else if(t.t==='planned'||t.t==='debtx'||t.t==='emerg')obl+=t.amt;else if(t.t==='adj')obl-=t.amt;}
+    run=run+inc-sal+close-dist-obl;
+    rows+=`<tr><td>${monthShort(m)}</td><td class="num">+${fmt(inc)}</td><td class="num">-${fmt(sal)}</td><td class="num">${close>=0?'+':''}${fmt(close)}</td><td class="num">${obl?(obl>0?'-':'+')+fmt(Math.abs(obl)):''}</td><td class="num">${dist?'-'+fmt(dist):''}</td><td class="num"><b>${fmt(run)}</b></td></tr>`;
+  }
+  h+=`<section class="card"><details class="more"><summary>حركة ظرف الاحتياطي شهر بشهر</summary><div class="table-wrap"><table><thead><tr><th>الشهر</th><th>إيراد</th><th>الحصة</th><th>باقي الحصة</th><th>التزامات وطوارئ</th><th>توزيع</th><th>الرصيد</th></tr></thead><tbody>
+    <tr><td class="muted">البداية</td><td></td><td></td><td></td><td></td><td></td><td class="num">${fmt(S.opening)}</td></tr>${rows}</tbody></table></div></details></section>`;
+  return h;
+}
+
+/* ---------- settings ---------- */
+function settingsView(){
+  const set=S.settings, b=set.budgets;
+  let h=header('الإعدادات');
+  h+=`<section class="card"><h2>حصة البيت الشهرية</h2>
+    <div class="big-line"><span class="num" id="shareTotal">${fmt(sum3(b))}</span><span class="muted">د.ت</span></div>
+    <p class="hint">${shareHint()}</p>
+    <div class="fields">
+      ${LAYERS.map(l=>`<div class="field"><label for="b-${l.id}"><i class="dot" style="background:var(--l-${l.id})"></i>${l.name}</label><input class="num" id="b-${l.id}" data-set="budget" data-key="${l.id}" type="number" inputmode="numeric" min="0" step="50" value="${b[l.id]}"></div>`).join('')}
+    </div><p class="hint">الحصة هي مجموع الطبقات الثلاث. التعديل يأثر على الشهر الجاي وعلى حساب التغطية والخطة.</p></section>`;
+  const groups=LAYERS.map(l=>`<div class="cat-group">
+      <div class="group-label" style="margin:0"><i class="dot" style="background:var(--l-${l.id})"></i><b style="color:var(--fg);font-size:14px">${l.name}</b><span>· ${set.cats[l.id].length} بنود</span></div>
+      <ul class="cat-list">${set.cats[l.id].map(c=>`<li class="cat-item"><input id="c-${c.id}" type="text" data-set="catname" data-layer="${l.id}" data-key="${c.id}" value="${esc(c.name)}" aria-label="اسم البند"><button type="button" class="icon-btn" data-action="del-cat" data-layer="${l.id}" data-id="${c.id}" aria-label="حذف ${esc(c.name)}">${ICON.trash}</button></li>`).join('')}</ul>
+      <div class="add-cat"><input id="new-${l.id}" type="text" data-new-cat="${l.id}" placeholder="بند جديد في ${l.name}" aria-label="بند جديد في ${l.name}"><button type="button" class="btn small ghost" data-action="add-cat" data-layer="${l.id}">إضافة</button></div>
+    </div>`).join('');
+  h+=`<section class="card"><h2>البنود</h2><p class="hint">غيّر الأسماء، احذف، أو أضف بنود لكل طبقة. العمليات القديمة تحتفظ باسم بندها حتى لو حذفته.</p>${groups}</section>`;
+  const catOpts=sel=>LAYERS.map(l=>`<optgroup label="${l.name}">${set.cats[l.id].map(c=>`<option value="${c.id}"${c.id===sel?' selected':''}>${esc(c.name)}</option>`).join('')}</optgroup>`).join('');
+  const fixedSum=activeFixed().reduce((a,f)=>a+f.amt,0);
+  h+=`<section class="card"><h2>المصاريف الثابتة</h2><p class="hint">تندفع أول كل شهر من ظرف البيت وتتسجل بضغطة وحدة، والباقي يتقسم على ظروف الأسابيع. المجموع <b class="num" id="fixedTotal">${fmt(fixedSum)}</b> من حصة <span class="num">${fmt(sum3(b))}</span>.</p>
+    ${S.fixed.length?S.fixed.map(f=>`<div class="fixed-row"><select id="fx-c-${f.id}" data-set="fixed-cat" data-key="${f.id}" aria-label="البند">${catOpts(f.cat)}</select><input class="num" id="fx-a-${f.id}" data-set="fixed-amt" data-key="${f.id}" type="number" inputmode="numeric" min="0" step="10" value="${f.amt}" aria-label="المبلغ"><button type="button" class="icon-btn" data-action="del-fixed" data-id="${f.id}" aria-label="حذف">${ICON.trash}</button>${!fixedActive(f)?'<span class="tag ok debt-link" style="justify-self:start">القرض خلص: موقوف</span>':''}${isDebtCat(f.cat)&&S.debts.length?`<select class="debt-link" id="fx-d-${f.id}" data-set="fixed-debt" data-key="${f.id}" aria-label="أي دين"><option value="">بدون ربط بدين</option>${S.debts.map(d=>`<option value="${d.id}"${d.id===f.debtId?' selected':''}>${esc(d.name)}</option>`).join('')}</select>`:''}</div>`).join(''):'<p class="empty">ما فيه مصاريف ثابتة.</p>'}
+    <button type="button" class="btn small ghost" data-action="add-fixed">+ مصروف ثابت</button></section>`;
+  h+=`<section class="card"><h2>حدود الاحتياطي (بالشهور)</h2><div class="fields two">
+      <div class="field"><label for="t-min">الترشيد يبدأ تحت</label><input class="num" id="t-min" data-set="brake" type="number" inputmode="decimal" min="0.5" max="12" step="0.5" value="${set.brake}"></div>
+      <div class="field"><label for="t-max">السقف</label><input class="num" id="t-max" data-set="tMax" type="number" inputmode="numeric" min="2" max="36" value="${set.tMax}"></div>
+    </div><p class="hint" id="tHint">${tHint()}</p></section>`;
+  h+=`<section class="card"><h2>توزيع الفايض (٪)</h2><div class="fields">
+      ${BUCKETS.map(([k,n])=>`<div class="field"><label for="s-${k}">${n}</label><input class="num" id="s-${k}" data-set="split" data-key="${k}" type="number" inputmode="numeric" min="0" max="100" step="5" value="${set.split[k]}"></div>`).join('')}
+    </div><p class="hint" id="splitHint">${splitHint()}</p></section>`;
+  h+=`<section class="card"><h2>أفراد الحساب</h2><div class="fields two">
+      <div class="field"><label for="m-0">الأول</label><input id="m-0" data-set="member" data-key="0" type="text" value="${esc(set.members[0])}"></div>
+      <div class="field"><label for="m-1">الثاني</label><input id="m-1" data-set="member" data-key="1" type="text" value="${esc(set.members[1])}"></div>
+    </div></section>`;
+  h+=`<section class="card"><h2>رصيد البداية</h2><div class="field"><label for="opening">كم كان في الاحتياطي أول ما بديتوا؟ (د.ت)</label><input class="num" id="opening" data-set="opening" type="number" inputmode="numeric" min="0" step="100" value="${S.opening}"></div></section>`;
+  if(LIVE){const me=getMe();h+=`<section class="card"><h2>حسابي على هالجوال</h2>
+    <div class="row"><span>أنا: <b>${esc(me!=null?set.members[me]:'ما اخترت')}</b></span><button type="button" class="btn small ghost" data-action="pick-me">غيّر</button></div>
+    <div class="btn-row"><button type="button" class="btn small ghost" data-action="backup">نزّل نسخة احتياطية</button><button type="button" class="btn small ghost" data-action="logout">تسجيل خروج</button></div>
+    <p class="hint">البيانات مشتركة بين جوالاتكم ومحفوظة على Netlify. النسخة الاحتياطية ملف تحفظونه عندكم احتياط.</p></section>`;}
+  h+=`<section class="card"><h2>البيانات</h2>
+    <p class="small muted">${LIVE?'المسح يمسح البيانات من كل الجوالات.':(S.isSample?'تشوفون الحين أرقام تجريبية.':'هذي بياناتكم أنتم.')+' في النسخة التجريبية البيانات محفوظة في هذا المتصفح فقط.'}</p>
+    <button type="button" class="btn ${ui.confirmReset?'danger':'ghost'} block" data-action="reset">${ui.confirmReset?'اضغط مرة ثانية للتأكيد':'امسح كل البيانات وابدأ من الصفر'}</button>
+    <p class="hint">يمسح العمليات والالتزامات والأهداف والديون، ويحتفظ بالإعدادات والبنود والمصاريف الثابتة.</p>
+    ${LIVE?'':'<button type="button" class="btn ghost block" data-action="load-sample">رجّع الأرقام التجريبية</button>'}</section>`;
+  return h;
+}
+function shareHint(){const a=avgSpend(S);return a?`متوسط مصاريفكم الفعلية في آخر ${a.n} ${a.n===1?'شهر':'شهور'}: ${fmt(a.avg)} د.ت.`:'بعد ما تقفلون أول شهر يطلع لكم متوسط مصاريفكم الفعلي تقارنون فيه الحصة.';}
+const splitSum=()=>BUCKETS.reduce((a,[k])=>a+(S.settings.split[k]||0),0);
+function splitHint(){const t=splitSum();return t===100?'المجموع 100٪.':`المجموع ${t}٪، لازم يكون 100٪.`;}
+function tHint(){const st=S.settings;return st.tMax<=st.brake?'السقف لازم يكون أكبر من حد الترشيد.':`تحت ${st.brake} شهر تنزل الحصة بدون الطبقة المرنة. فوق ${st.tMax} شهور يتوزع الفايض.`;}
+
+function render(){
+  const v=$('#view');chartData=null;
+  v.innerHTML=ui.tab==='home'?homeView():ui.tab==='tx'?txView():ui.tab==='env'?envView():ui.tab==='plan'?planView():settingsView();
+  document.querySelectorAll('.nav-btn').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ui.tab?'page':'false'));
+  if(ui.tab==='plan')bindChart();
+}
+function go(tab){ui.tab=tab;ui.confirmReset=false;render();window.scrollTo(0,0);}
+function rerenderKeepScroll(){const y=window.scrollY;render();window.scrollTo(0,y);}
+
+/* ---------- toast ---------- */
+let toastTimer=null,undoFn=null;
+function toast(msg,undo){
+  $('#toastMsg').textContent=msg;undoFn=undo||null;$('#toastUndo').hidden=!undo;$('#toast').hidden=false;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{$('#toast').hidden=true;undoFn=null;},undo?6000:4500);
+}
+$('#toastUndo').addEventListener('click',()=>{if(undoFn)undoFn();$('#toast').hidden=true;undoFn=null;});
+
+/* ---------- entry sheet ---------- */
+const form={kind:'exp',cat:null,who:0,debt:null};
+function renderSheet(){
+  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.kind===form.kind)));
+  let h='';
+  if(form.kind==='exp'){
+    const mode=monthMode(S,S.month), planned=plannedFor(S,mode);
+    for(const l of LAYERS){
+      const items=S.settings.cats[l.id];if(!items.length)continue;
+      const frozen=planned[l.id]===0&&S.settings.budgets[l.id]>0;
+      h+=`<div><div class="group-label"><i class="dot" style="background:var(--l-${l.id})"></i>${l.name}${frozen?' · مجمّد هذا الشهر':''}</div><div class="chips">${items.map(c=>`<button type="button" class="chip" data-cat="${c.id}" aria-pressed="${form.cat===c.id}">${esc(c.name)}</button>`).join('')}</div></div>`;
+    }
+    if(!h)h=`<p class="small muted">ما فيه بنود. أضفها من الإعدادات.</p>`;
+    const open=S.debts.filter(d=>debtLeft(d)>0);
+    if(form.cat&&isDebtCat(form.cat)&&open.length){
+      h+=`<div><div class="group-label">أي دين؟ (يخصم من الباقي عليه)</div><div class="chips">${open.map(d=>`<button type="button" class="chip" data-debt="${d.id}" aria-pressed="${form.debt===d.id}">${esc(d.name)}</button>`).join('')}<button type="button" class="chip" data-debt="" aria-pressed="${!form.debt}">بدون تحديد</button></div></div>`;
+    }
+  }else if(form.kind==='emg'){
+    h=`<div class="banner warn">${ICON.alert}<div><b>من ظرف الاحتياطي، مو من حصة الشهر</b><p>للي ما ينتظر: علاج، تصليح ضروري، سفر طارئ. مو للطلعات ولا المشتريات.</p></div></div>`;
+  }else{
+    h=`<div class="banner info">${ICON.info}<p>الإيراد يروح لظرف الاحتياطي مباشرة، وما يدخل في مصروف الشهر.</p></div>`;
+  }
+  $('#catWrap').innerHTML=h;
+  $('#whoWrap').innerHTML=S.settings.members.map((n,i)=>`<button type="button" class="chip" data-who="${i}" aria-pressed="${form.who===i}">${esc(n)}</button>`).join('');
+}
+function resetWarn(){if(form.warned){form.warned=false;$('#formError').textContent='';$('#txForm button[type=submit]').textContent='حفظ';}}
+function openSheet(){
+  form.kind='exp';form.cat=null;form.debt=null;form.warned=true;resetWarn();
+  if(LIVE&&getMe()!=null)form.who=getMe();
+  $('#f-amount').value='';$('#f-note').value='';$('#formError').textContent='';
+  renderSheet();$('#sheet').hidden=false;
+  setTimeout(()=>{try{$('#f-amount').focus();}catch(e){}},60);
+}
+function closeSheet(){$('#sheet').hidden=true;if(pendingRender)setTimeout(()=>refreshUI(),0);}
+$('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeSheet();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet();
+  if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.newCat){e.preventDefault();addCat(e.target.dataset.newCat);}
+});
+function parseAmt(v){const n=parseFloat(String(v||'').trim().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/,/g,'.'));return n>0?Math.round(n*100)/100:0;}
+$('#txForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const amt=parseAmt($('#f-amount').value);
+  if(!amt){$('#formError').textContent='اكتب مبلغ أكبر من صفر.';return;}
+  if(form.kind==='exp'&&!form.cat){$('#formError').textContent='اختر بند المصروف.';return;}
+  if(form.kind==='exp'&&!form.warned){
+    const wi=weekInfo(), fixedCat=activeFixed().some(f=>f.cat===form.cat), hc=houseCash();
+    let w='';
+    if(amt>hc+0.5)w=`هالمصروف يتعدى اللي باقي في ظرف البيت (${fmt(Math.max(0,hc))}) بـ ${fmt(amt-Math.max(0,hc))}. الفرق بينخصم من الاحتياطي آخر الشهر.`;
+    else if(!fixedCat&&amt>wi.left+0.5)w=`هالمصروف يتعدى ظرف هالأسبوع (${fmt(Math.max(0,wi.left))}) بـ ${fmt(amt-Math.max(0,wi.left))}، وبينخصم من الأسابيع الجاية.`;
+    if(w){form.warned=true;$('#formError').textContent=w;$('#txForm button[type=submit]').textContent='سجّله برضو';return;}
+  }
+  const note=$('#f-note').value.trim().slice(0,80);
+  if(form.kind==='emg'&&amt>reservoir(S)){$('#formError').textContent='المبلغ أكبر من رصيد الاحتياطي.';return;}
+  const t={id:uid(),t:form.kind==='emg'?'emerg':form.kind,amt,who:form.who,note,m:S.month,d:new Date().getDate()};
+  if(form.kind==='exp'){const f=findCat(form.cat);t.cat=form.cat;t.cname=f?f.name:'';t.layer=f?f.layer:'ess';if(form.debt&&isDebtCat(form.cat))t.debtId=form.debt;}
+  S.tx.push(t);save();closeSheet();render();
+  const st=stats(S,S.month);
+  const lack=sum3(st.planned)-st.paid;
+  if(form.kind==='inc'&&lack>0.5&&S.started!==false){
+    const add=Math.min(lack,reservoir(S));
+    if(add>0.5){S.tx.push({id:uid(),t:'salary',amt:add,mode:st.mode,m:S.month,d:new Date().getDate()});save();render();}
+    toast(`إيراد ${fmt(amt)} د.ت راح للاحتياطي، ومنه اكتملت حصة الشهر (+${fmt(add)})`);
+  }
+  else toast(form.kind==='exp'?`تسجّل مصروف ${fmt(amt)} د.ت`:form.kind==='emg'?`طارئ ${fmt(amt)} د.ت انخصم من ظرف الاحتياطي`:`إيراد ${fmt(amt)} د.ت راح للاحتياطي`);
+});
+
+/* ---------- settings: categories ---------- */
+function addCat(layer){
+  const input=$('#new-'+layer);if(!input)return;
+  const name=input.value.trim().slice(0,30);
+  if(!name){input.focus();return;}
+  S.settings.cats[layer].push({id:'c'+uid(),name});save();rerenderKeepScroll();
+  toast(`انضاف «${name}» في ${layerName(layer)}`);
+  const n=$('#new-'+layer);if(n){try{n.focus();}catch(e){}}
+}
+function removeWithUndo(arr,id,label){
+  const i=arr.findIndex(x=>x.id===id);if(i<0)return;
+  const [removed]=arr.splice(i,1);save();rerenderKeepScroll();
+  toast(`انحذف «${removed.name}»`,()=>{arr.splice(i,0,removed);save();rerenderKeepScroll();});
+}
+const val=id=>{const el=$('#'+id);return el?el.value:'';};
+
+/* ---------- actions ---------- */
+document.addEventListener('click',e=>{
+  const tabBtn=e.target.closest('.nav-btn[data-tab]');if(tabBtn){go(tabBtn.dataset.tab);return;}
+  const goBtn=e.target.closest('[data-tab-go]');if(goBtn){go(goBtn.dataset.tabGo);return;}
+  const kind=e.target.closest('[data-kind]');if(kind){form.kind=kind.dataset.kind;form.cat=null;form.debt=null;resetWarn();renderSheet();return;}
+  const cat=e.target.closest('[data-cat]');if(cat){form.cat=cat.dataset.cat;if(!isDebtCat(form.cat))form.debt=null;resetWarn();renderSheet();return;}
+  const debt=e.target.closest('[data-debt]');if(debt){form.debt=debt.dataset.debt||null;renderSheet();return;}
+  const who=e.target.closest('[data-who]');if(who){form.who=Number(who.dataset.who);renderSheet();return;}
+  const a=e.target.closest('[data-action]');if(!a||a.disabled)return;
+  const act=a.dataset.action, id=a.dataset.id;
+  if(act==='open-sheet')openSheet();
+  else if(act==='close-sheet')closeSheet();
+  else if(act==='advance'){
+    const before=modeFor(S,reservoir(S));ui.count=null;
+    const r=closeMonth(S);save();render();window.scrollTo(0,0);
+    let msg=`قفلنا ${monthShort(r.old)}: ${r.left>=0?'رجع '+fmt(r.left)+' للاحتياطي':'تجاوز '+fmt(-r.left)+' انخصم من الاحتياطي'}. نزلت حصة ${monthShort(S.month)} ${fmt(r.pay.amt)} د.ت.`;
+    if(r.pay.mode!==before&&r.pay.mode==='austerity')msg+=' دخلتوا '+MODE_LABEL[r.pay.mode]+'.';
+    if(dueNow().length)msg+=' عندكم التزام مستحق.';
+    toast(msg);
+  }
+  else if(act==='topup'){
+    const st=stats(S,S.month), res=reservoir(S), amt=Math.min(sum3(st.planned)-st.paid,res);
+    if(amt>0){S.tx.push({id:uid(),t:'salary',amt,mode:st.mode,m:S.month,d:new Date().getDate()});save();render();toast(`نزل ${fmt(amt)} د.ت من الاحتياطي لحصة الشهر`);}
+  }
+  else if(act==='distribute'){
+    const sur=surplusOf(S);if(sur<=0)return;
+    BUCKETS.forEach(([k])=>{const v=Math.round(sur*S.settings.split[k]/100);if(v>0)S.tx.push({id:uid(),t:'dist',amt:v,to:k,m:S.month,d:new Date().getDate()});});
+    save();render();toast(`توزّع ${fmt(sur)} د.ت على الصناديق`);
+  }
+  else if(act==='del'){
+    const i=S.tx.findIndex(t=>t.id===id);if(i<0)return;
+    const [removed]=S.tx.splice(i,1);save();rerenderKeepScroll();
+    toast('انحذفت العملية',()=>{S.tx.splice(i,0,removed);save();rerenderKeepScroll();});
+  }
+  else if(act==='add-cat')addCat(a.dataset.layer);
+  else if(act==='del-cat')removeWithUndo(S.settings.cats[a.dataset.layer],id);
+  /* plan: obligations */
+  else if(act==='add-plan'){
+    const name=val('np-name').trim().slice(0,30), amt=parseAmt(val('np-amt')), mm=Number(val('np-mm')), yy=Number(val('np-yy')), yearly=$('#np-yearly').checked;
+    if(!name){$('#np-err').textContent='اكتب اسم الالتزام.';return;}
+    if(!amt){$('#np-err').textContent='اكتب المبلغ.';return;}
+    if(mkey(yy,mm)<S.month&&!yearly){$('#np-err').textContent='التاريخ فات. اختر شهر جاي.';return;}
+    S.plans.push({id:'p'+uid(),name,amt,mm,yy,yearly});save();rerenderKeepScroll();toast(`انضاف «${name}» للالتزامات`);
+  }
+  else if(act==='del-plan')removeWithUndo(S.plans,id);
+  else if(act==='pay-plan'){
+    const p=byId(S.plans,id);if(!p)return;
+    S.tx.push({id:uid(),t:'planned',amt:p.amt,planId:p.id,pname:p.name,occ:a.dataset.occ,m:S.month,d:new Date().getDate()});
+    save();rerenderKeepScroll();toast(`اندفع «${p.name}» ${fmt(p.amt)} د.ت من الاحتياطي`);
+  }
+  /* plan: goals */
+  else if(act==='add-goal'){
+    const name=val('ng-name').trim().slice(0,30), target=parseAmt(val('ng-amt')), mm=Number(val('ng-mm')), yy=Number(val('ng-yy'));
+    if(!name){$('#ng-err').textContent='اكتب اسم الهدف.';return;}
+    if(!target){$('#ng-err').textContent='اكتب المبلغ المطلوب.';return;}
+    if(mm&&mkey(yy,mm)<=S.month){$('#ng-err').textContent='اختر موعد بعد هذا الشهر.';return;}
+    S.goals.push({id:'g'+uid(),name,target,mm:mm||null,yy:mm?yy:null,done:false});save();rerenderKeepScroll();toast(`انضاف هدف «${name}»`);
+  }
+  else if(act==='del-goal')removeWithUndo(S.goals,id);
+  else if(act==='goal-up'||act==='goal-down'){
+    const act2=S.goals.filter(g=>!g.done), i=act2.findIndex(g=>g.id===id), j=act==='goal-up'?i-1:i+1;
+    if(i<0||j<0||j>=act2.length)return;
+    const gi=S.goals.indexOf(act2[i]), gj=S.goals.indexOf(act2[j]);[S.goals[gi],S.goals[gj]]=[S.goals[gj],S.goals[gi]];
+    save();rerenderKeepScroll();
+  }
+  else if(act==='goal-done'){
+    const g=byId(S.goals,id);if(!g)return;
+    const t={id:uid(),t:'goalspend',amt:g.target,goalId:g.id,m:S.month,d:new Date().getDate()};
+    S.tx.push(t);g.done=true;save();rerenderKeepScroll();
+    toast(`مبروك! تحقق «${g.name}»`,()=>{S.tx=S.tx.filter(x=>x.id!==t.id);g.done=false;save();rerenderKeepScroll();});
+  }
+  else if(act==='goal-transfer'){
+    const amt=parseAmt(val('gt-amt')), res=reservoir(S), fs=fullShare(S);
+    if(!amt)return;
+    if(amt>res){toast('المبلغ أكبر من رصيد الاحتياطي.');return;}
+    S.tx.push({id:uid(),t:'dist',amt,to:'goals',manual:true,m:S.month,d:new Date().getDate()});save();rerenderKeepScroll();
+    const cov=fs?(res-amt)/fs:0;
+    toast(`تحوّل ${fmt(amt)} د.ت للأهداف. الاحتياطي الحين يغطي ${cov.toFixed(1)} شهر${cov<S.settings.brake?'، يعني ترشيد':''}.`);
+  }
+  /* plan: debts */
+  else if(act==='add-debt'){
+    const name=val('nd-name').trim().slice(0,30), amount=parseAmt(val('nd-amt')), inst=parseAmt(val('nd-inst'));
+    if(!name){$('#nd-err').textContent='اكتب اسم الدين.';return;}
+    if(!amount||!inst){$('#nd-err').textContent='اكتب المبلغ الباقي والقسط الشهري.';return;}
+    S.debts.push({id:'d'+uid(),name,amount,inst});save();rerenderKeepScroll();toast(`انضاف «${name}». سجّلوا أقساطه من + ببند سداد الديون.`);
+  }
+  else if(act==='del-debt')removeWithUndo(S.debts,id);
+  else if(act==='debt-inst'||act==='debt-extra'){
+    const d=byId(S.debts,id);if(!d)return;const amt=Math.min(d.inst,debtLeft(d));if(!amt)return;
+    let t;
+    if(act==='debt-inst'){
+      const f=findCat('debt')||(S.settings.cats.ess[0]&&{layer:'ess',name:S.settings.cats.ess[0].name});
+      t={id:uid(),t:'exp',amt,cat:findCat('debt')?'debt':(S.settings.cats.ess[0]||{}).id,cname:f?f.name:'سداد الديون',layer:'ess',debtId:d.id,who:0,note:'',m:S.month,d:new Date().getDate()};
+    }else{
+      if(amt>reservoir(S)){toast('الاحتياطي ما يكفي لهالدفعة.');return;}
+      t={id:uid(),t:'debtx',amt,debtId:d.id,m:S.month,d:new Date().getDate()};
+    }
+    S.tx.push(t);save();rerenderKeepScroll();
+    toast(act==='debt-inst'?`تسجّل قسط «${d.name}» ${fmt(amt)} د.ت من حصة الشهر`:`اندفع ${fmt(amt)} د.ت لـ«${d.name}» من الاحتياطي`,()=>{S.tx=S.tx.filter(x=>x.id!==t.id);save();rerenderKeepScroll();});
+  }
+  else if(act==='start'){
+    const open=parseAmt(val('su-open'));
+    if(val('su-open').trim()===''){$('#su-err').textContent='اكتبوا كم عندكم الحين، حتى لو صفر.';return;}
+    LAYERS.forEach(l=>{S.settings.budgets[l.id]=Math.max(0,Number(val('su-'+l.id))||0);});
+    S.settings.members=[val('su-m0').trim()||'الأول',val('su-m1').trim()||'الثاني'];
+    if(fullShare(S)<=0){$('#su-err').textContent='حصة البيت لازم تكون أكبر من صفر.';return;}
+    S.opening=open;S.month=thisMonth();S.started=true;payShare(S);save();render();
+    toast(`بدأتوا! نزلت حصة ${monthShort(S.month)} ${fmt(stats(S,S.month).paid)} د.ت لظرف البيت.`);
+    if(LIVE&&getMe()==null)showPick();
+  }
+  else if(act==='pick-me')showPick();
+  else if(act==='backup'){
+    const blob=new Blob([JSON.stringify({exported:new Date().toISOString(),state:S},null,1)],{type:'application/json'});
+    const u=URL.createObjectURL(blob), l=document.createElement('a');l.href=u;l.download='budget-backup-'+thisMonth()+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);
+  }
+  else if(act==='logout'){setPass('');try{localStorage.removeItem(LKEY);localStorage.removeItem('kz-me');}catch(e){}location.reload();}
+  /* envelopes */
+  else if(act==='pay-fixed'){
+    const wi=weekInfo();if(!wi.unpaid.length)return;
+    const added=wi.unpaid.map(f=>{const c=findCat(f.cat)||{layer:'ess',name:'مصروف ثابت'};const t={id:uid(),t:'exp',amt:f.amt,cat:f.cat,cname:c.name,layer:c.layer,fixedId:f.id,who:0,note:'',m:S.month,d:1};if(f.debtId&&debtLeft(byId(S.debts,f.debtId)||{amount:0,id:''})>0)t.debtId=f.debtId;return t;});
+    S.tx.push(...added);save();rerenderKeepScroll();
+    const ids=new Set(added.map(t=>t.id));
+    toast(`تسجّلت ${added.length} مصاريف ثابتة`,()=>{S.tx=S.tx.filter(t=>!ids.has(t.id));save();rerenderKeepScroll();});
+  }
+  else if(act==='ritual-split'){const r=S.ritual[S.month]||{};r.split=!r.split;S.ritual[S.month]=r;save();rerenderKeepScroll();}
+  else if(act==='count'){
+    const v={};['c-house','c-rcash','c-rbank','c-goals'].forEach(k=>{const x=val(k).trim();v[k]=x===''?null:Number(x.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)));});
+    const rows=[];const b=buckets(S);
+    if(v['c-house']!=null)rows.push({key:'house',label:'ظرف البيت',diff:v['c-house']-houseCash()});
+    if(v['c-rcash']!=null||v['c-rbank']!=null)rows.push({key:'res',label:'الاحتياطي',diff:(v['c-rcash']||0)+(v['c-rbank']||0)-reservoir(S)});
+    if(v['c-goals']!=null)rows.push({key:'goals',label:'الأهداف',diff:v['c-goals']-bucketsTotal(b)});
+    if(!rows.length){toast('اكتبوا رقم واحد على الأقل');return;}
+    ui.count={vals:v,rows,tooMuchCash:Math.max(0,(v['c-rcash']||0)-fullShare(S))};
+    S.lastCount={m:S.month,d:todayDay()};save();rerenderKeepScroll();
+  }
+  else if(act==='count-fix'){
+    const k=a.dataset.key, rw=ui.count&&ui.count.rows.find(x=>x.key===k);if(!rw)return;
+    const d=Math.round(rw.diff*100)/100;
+    if(k==='house')S.tx.push({id:uid(),t:'exp',amt:-d,cat:'adj',cname:d<0?'مصروف ما تسجّل (جرد)':'تصحيح جرد',layer:'flex',who:0,note:'',m:S.month,d:todayDay()});
+    else if(k==='res')S.tx.push({id:uid(),t:'adj',amt:d,m:S.month,d:todayDay()});
+    else S.tx.push({id:uid(),t:'gadj',amt:d,m:S.month,d:todayDay()});
+    rw.diff=0;save();rerenderKeepScroll();toast('تعدّلت الأرقام على المعدود');
+  }
+  else if(act==='add-fixed'){const first=(S.settings.cats.ess[0]||S.settings.cats.imp[0]||{id:'rent'}).id;S.fixed.push({id:'f'+uid(),cat:first,amt:0});save();rerenderKeepScroll();}
+  else if(act==='del-fixed'){const i=S.fixed.findIndex(f=>f.id===id);if(i<0)return;const [rm]=S.fixed.splice(i,1);save();rerenderKeepScroll();toast('انحذف المصروف الثابت',()=>{S.fixed.splice(i,0,rm);save();rerenderKeepScroll();});}
+  else if(act==='reset'){
+    if(!ui.confirmReset){ui.confirmReset=true;rerenderKeepScroll();clearTimeout(ui.resetTimer);ui.resetTimer=setTimeout(()=>{if(ui.confirmReset){ui.confirmReset=false;if(ui.tab==='set')rerenderKeepScroll();}},4000);return;}
+    ui.confirmReset=false;ui.count=null;S=emptyState(S);if(LIVE)S.started=false;save();render();toast('بدأتوا من الصفر. اكتب رصيد البداية تحت، وبعدها كمّل حصة الشهر من الرئيسية.');
+    setTimeout(()=>{const o=$('#opening');if(o){o.scrollIntoView({block:'center'});try{o.focus();}catch(e){}}},50);
+  }
+  else if(act==='load-sample'){ui.count=null;S=sample();save();go('home');toast('رجعت الأرقام التجريبية');}
+});
+
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.id==='f-amount'){resetWarn();return;}
+  if(el.dataset&&el.dataset.count){ui.count=ui.count||{vals:{}};ui.count.vals[el.dataset.count]=el.value;return;}
+  if(!el.dataset||!el.dataset.set)return;
+  const k=el.dataset.set, key=el.dataset.key, n=Math.max(0,Number(el.value)||0);
+  if(k==='budget')S.settings.budgets[key]=n;
+  else if(k==='split')S.settings.split[key]=Math.min(100,n);
+  else if(k==='brake')S.settings.brake=Math.max(0.5,n);
+  else if(k==='tMax')S.settings.tMax=Math.max(1,n);
+  else if(k==='member')S.settings.members[Number(key)]=el.value.slice(0,24);
+  else if(k==='opening')S.opening=n;
+  else if(k==='expected')S.settings.expectedIncome=n;
+  else if(k==='catname'){const c=S.settings.cats[el.dataset.layer].find(x=>x.id===key);if(c)c.name=el.value.slice(0,30);}
+  else if(k==='fixed-amt'){const f=byId(S.fixed,key);if(f)f.amt=n;const ft=$('#fixedTotal');if(ft)ft.textContent=fmt(activeFixed().reduce((a,x)=>a+x.amt,0));}
+  else if(k==='fixed-cat'){const f=byId(S.fixed,key);if(f){f.cat=el.value;if(!isDebtCat(f.cat))delete f.debtId;}save();rerenderKeepScroll();return;}
+  else if(k==='fixed-debt'){const f=byId(S.fixed,key);if(f){if(el.value)f.debtId=el.value;else delete f.debtId;}}
+  save();
+  const st=$('#shareTotal');if(st)st.textContent=fmt(fullShare(S));
+  const sh=$('#splitHint');if(sh){sh.textContent=splitHint();sh.classList.toggle('bad',splitSum()!==100);}
+  const th=$('#tHint');if(th){th.textContent=tHint();th.classList.toggle('bad',S.settings.tMax<=S.settings.brake);}
+});
+document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.set==='expected')rerenderKeepScroll();});
+
+document.getElementById('gateForm').addEventListener('submit',async e=>{
+  e.preventDefault();const pass=$('#g-pass').value;$('#g-err').textContent='';
+  if(!pass){$('#g-err').textContent='اكتبوا كلمة السر.';return;}
+  try{
+    const doc=await api('GET',null,pass);setPass(pass);
+    if(base&&doc.rev!==base.rev){base=null;}  // a different household or a fresh login: take the server copy
+    mergeFromServer(doc);persistLocal();
+    $('#gate').hidden=true;catchUp();render();
+    if(!diff().empty)schedulePush();else setSync('ok');
+    if(getMe()==null&&S.started!==false)showPick();
+  }catch(err){$('#g-err').textContent=err.status===401?'كلمة السر غلط.':'ما قدرنا نوصل. تأكدوا من الإنترنت وجرّبوا مرة ثانية.';}
+});
+document.getElementById('pickBtns').addEventListener('click',e=>{const b=e.target.closest('[data-me]');if(!b)return;setMe(Number(b.dataset.me));$('#gate').hidden=true;refreshUI(true);});
+document.addEventListener('focusout',()=>{if(pendingRender)setTimeout(()=>{if(!busy())refreshUI();},150);});
+
+render();
+if(LIVE){
+  if(!getPass())showGate();else pull();
+  setInterval(()=>{if(document.visibilityState==='visible')pull();},20000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pull();});
+  window.addEventListener('online',()=>{push();pull();});
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+})();
+</script>
+
+</body>
+</html>
