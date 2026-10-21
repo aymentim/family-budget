@@ -66,6 +66,11 @@ p{margin:0}
 .av.a1{background:var(--accent-soft);color:var(--accent-soft-fg)}
 .avatars .av+.av{margin-inline-start:-10px}
 .gear{width:44px;height:44px;border-radius:50%;border:none;background:var(--surface);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.top-btns{display:flex;gap:8px}
+.gear.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.gear.spin svg{animation:none}.gear.spin{opacity:.6}}
+.todo-btns{display:flex;flex-direction:column;gap:6px}
 .gear[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
 
 .card{background:var(--surface);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
@@ -482,6 +487,7 @@ const MODE_LABEL={surplus:'فايض',safe:'آمن',austerity:'ترشيد'};
 const SHARE_KIND={surplus:'حصة كاملة',safe:'حصة كاملة',austerity:'حصة مرشّدة: الكماليات موقوفة'};
 
 const ICON={
+  refresh:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>',
   alert:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg>',
   info:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
   ok:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
@@ -576,9 +582,12 @@ function autoMonth(s){
   const catOf=id=>{for(const l in s.settings.cats){const c=s.settings.cats[l].find(x=>x.id===id);if(c)return {layer:l,name:c.name};}return null;};
   const debtOpen=id=>{const d=s.debts.find(x=>x.id===id);if(!d)return false;let p=0;for(const t of s.tx)if(t.debtId===id&&(t.t==='exp'||t.t==='debtx'))p+=t.amt;return d.amount-p>0.5;};
   recomputeBudgets(s);
+  let room=s.tx.reduce((a,t)=>a+(t.m===s.month&&t.t==='salary'?t.amt:0)-(t.m===s.month&&t.t==='exp'?t.amt:0),0);
   for(const l of ['ess','flex'])for(const f of s.settings.cats[l]||[]){
     if(!f.fixed||!(f.amt>0)||(f.debtId&&!debtOpen(f.debtId)))continue;
     const id='fx-'+f.id+'-'+s.month;if(s.tx.some(t=>t.id===id||(t.m===s.month&&t.t==='exp'&&t.cat===f.id&&(t.fixedId||t.auto))))continue;
+    if(f.amt>room+0.5)continue;   // not covered yet: it waits for the next money in
+    room-=f.amt;
     const t={id,t:'exp',amt:f.amt,cat:f.id,cname:f.name,layer:l,fixedId:f.id,who:null,note:'',m:s.month,d:1,auto:true};
     if(f.debtId)t.debtId=f.debtId;s.tx.push(t);
   }
@@ -615,6 +624,7 @@ function totalCard(){
     <div class="tot-rows">${parts.map((x,i)=>`<div><span class="lab"><i class="dot" style="background:${x[3]}"></i>${x[1]}</span><span class="num ${i===0&&w.house<0?'over':''}">${fmt(i===0?w.house:x[2])}</span></div>`).join('')}</div>
   </section>`;
 }
+function fixedCoverable(){const w=weekInfo().unpaid;let room=Math.max(0,houseCash()),ok=[],wait=[];for(const f of w){if(f.amt<=room+0.5){ok.push(f);room-=f.amt;}else wait.push(f);}return {ok,wait};}
 function houseCash(){const st=stats(S,S.month);return st.paid-st.spentTotal;}
 function ritual(){return S.ritual[S.month]||{};}
 function surplusOf(s){return reservoir(s)-s.settings.tMax*fullShare(s);}
@@ -628,7 +638,10 @@ function avgSpend(s){
 /* ---------- engine: planning ---------- */
 const planStart=p=>mkey(p.yy,p.mm);
 function planPaid(p,occ){return S.tx.some(t=>t.t==='planned'&&t.planId===p.id&&t.occ===occ);}
+// Hijri yearly expenses (Ramadan, Eid) come about 11 days earlier every Gregorian year.
+function lunarOcc(p,k){const d=new Date(Date.UTC(p.yy,p.mm-1,1)+k*354.367*864e5);return mkey(d.getUTCFullYear(),d.getUTCMonth()+1);}
 function planNext(p){
+  if(p.yearly&&p.lunar){for(let k=0;k<80;k++){const occ=lunarOcc(p,k);if(occ<S.month||planPaid(p,occ))continue;return {occ,overdue:false};}return null;}
   if(!p.yearly){const occ=planStart(p);if(planPaid(p,occ))return null;return {occ,overdue:occ<S.month};}
   const cy=ym(S.month).y;let occ=mkey(cy,p.mm);
   if(occ<S.month)occ=mkey(cy+1,p.mm);
@@ -640,7 +653,8 @@ function dueNow(){return S.plans.map(p=>({p,n:planNext(p)})).filter(x=>x.n&&x.n.
 function plannedOutAt(K){
   let s=0;
   for(const p of S.plans){
-    if(p.yearly){if(ym(K).mm===p.mm&&K>=planStart(p)&&!planPaid(p,K))s+=p.amt;}
+    if(p.yearly&&p.lunar){if(K>=planStart(p)&&!planPaid(p,K)){for(let k=0;k<80;k++){const o=lunarOcc(p,k);if(o===K){s+=p.amt;break;}if(o>K)break;}}}
+    else if(p.yearly){if(ym(K).mm===p.mm&&K>=planStart(p)&&!planPaid(p,K))s+=p.amt;}
     else if(planStart(p)===K&&!planPaid(p,K))s+=p.amt;
   }
   return s;
@@ -666,7 +680,8 @@ function goalsMonthlyNeed(){
 function debtPaid(d){let p=0;for(const t of S.tx)if(t.debtId===d.id&&(t.t==='exp'||t.t==='debtx'))p+=t.amt;return p;}
 const debtLeft=d=>Math.max(0,d.amount-debtPaid(d));
 function incomeHistory(){
-  const months=[...new Set(S.tx.map(t=>t.m))].sort().slice(-6);
+  const all=[...new Set(S.tx.map(t=>t.m))].sort(), done=all.filter(m=>m<S.month);
+  const months=(done.length?done:all).slice(-6);
   const tot=S.tx.filter(t=>t.t==='inc'&&months.includes(t.m)).reduce((a,t)=>a+t.amt,0);
   return {avg:months.length?tot/months.length:0,n:months.length};
 }
@@ -701,7 +716,7 @@ function sample(){
     plans:[
       {id:'p1',name:'رسوم المدرسة',amt:1200,mm:9,yy:2027,yearly:true},
       {id:'p2',name:'تأمين السيارة',amt:650,mm:2,yy:2027,yearly:true},
-      {id:'p3',name:'رمضان والعيد',amt:800,mm:2,yy:2027,yearly:false},
+      {id:'p3',name:'رمضان والعيد',amt:800,mm:2,yy:2027,yearly:true,lunar:true},
       {id:'p4',name:'أضحية العيد',amt:900,mm:5,yy:2027,yearly:false},
       {id:'p5',name:'سفرة الصيف',amt:1500,mm:7,yy:2027,yearly:true}
     ],
@@ -746,6 +761,7 @@ function normalize(s){
   if(!s.settings.split||s.settings.split.proj!=null)s.settings.split={goals:90,fun:10};
   if(!Array.isArray(s.fixed)){if(s.isSample)return null;s.fixed=[];}
   if(!s.ritual)s.ritual={};
+  for(const p of s.plans)if(p.yearly&&p.lunar==null&&/رمضان|عيد|أضحي|اضحي/.test(p.name||''))p.lunar=true;
   if(s.lastCount===undefined)s.lastCount=null;
   if(!s.settings.itemBudgets){
     const c0=s.settings.cats, b0=s.settings.budgets||{ess:0,imp:0,flex:0};
@@ -823,6 +839,14 @@ async function push(){
   pushing=false;
   if(pushAgain||!diff().empty){pushAgain=false;push();}else setSync('ok');
 }
+// Refresh button: send anything pending, fetch the latest from the other phone, then reload for the newest app version.
+async function doRefresh(btn){
+  if(btn.classList.contains('spin'))return;btn.classList.add('spin');
+  if(!LIVE){setTimeout(()=>{btn.classList.remove('spin');rerenderKeepScroll();toast('تحدّث');},400);return;}
+  try{if(!diff().empty&&!pushing)await push();let n=0;while((pulling||pushing)&&n<20){await new Promise(r=>setTimeout(r,250));n++;}await pull();}catch(e){}
+  if(syncState==='ok'&&diff().empty){location.reload();return;}
+  btn.classList.remove('spin');toast(syncState==='offline'?'ما في نت. المعروض آخر نسخة محفوظة.':'تحدّث');
+}
 async function pull(){
   if(!LIVE||!getPass()||pulling||pushing)return;
   pulling=true;
@@ -855,7 +879,7 @@ let chartData=null;
 /* ---------- shared pieces ---------- */
 function header(title,sub){
   return `<header class="top"><div><div class="eyebrow">${title}</div><h1>${sub||monthLabel(S.month)}</h1>${LIVE?`<span class="sync" id="syncDot" data-s="${syncState}">${SYNC_LABEL[syncState]}</span>`:''}</div>
-    <button type="button" class="gear" data-tab-go="set" aria-label="الإعدادات" aria-current="${ui.tab==='set'?'page':'false'}">${ICON.gear}</button></header>`;
+    <div class="top-btns"><button type="button" class="gear" data-action="refresh" aria-label="تحديث">${ICON.refresh}</button><button type="button" class="gear" data-tab-go="set" aria-label="الإعدادات" aria-current="${ui.tab==='set'?'page':'false'}">${ICON.gear}</button></div></header>`;
 }
 const whoName=t=>(t.who!=null&&S.settings.members[t.who])||'';
 function txRow(t,del){
@@ -911,22 +935,47 @@ function setupCard(){
 function todos(){
   const rows=[], st=stats(S,S.month), wi=weekInfo(), r=ritual(), res=reservoir(S), plannedTotal=sum3(st.planned);
   const dist=S.tx.find(t=>t.id==='dist-'+S.month), autoFx=S.tx.filter(t=>t.auto&&t.t==='exp'&&t.m===S.month);
+  const lack=plannedTotal-st.paid;
   if(st.paid>0&&!r.ack){
-    const lines=[`خذوا <b class="num">${fmt(st.paid)}</b> من الاحتياطي لظرف البيت${st.mode==='austerity'?' (مرشّدة)':''}.`];
+    const lines=[`خذوا <b class="num">${fmt(st.paid)}</b> من الاحتياطي لظرف البيت${st.mode==='austerity'?' (مرشّدة)':''}${lack>0.5?`، والباقي <b class="num">${fmt(lack)}</b> ينزل أول ما يدخل فلوس`:''}.`];
     if(autoFx.length)lines.push(`ادفعوا الثابتة <b class="num">${fmt(autoFx.reduce((a,t)=>a+t.amt,0))}</b>، تسجّلت لحالها.`);
     lines.push(`حطوا <b class="num">${fmt(wi.weekly)}</b> في كل ظرف أسبوع.`);
     if(dist)lines.push(`حوّلوا <b class="num">${fmt(dist.amt)}</b> من الاحتياطي لظرف الأهداف.`);
     rows.push(`<div class="todo"><div><b>بداية ${monthShort(S.month)}</b><ul class="todo-lines">${lines.map(l=>`<li>${l}</li>`).join('')}</ul></div><button type="button" class="btn small" data-action="ack">تم</button></div>`);
   }
-  if(st.paid<plannedTotal-0.5&&res>0.5)rows.push(`<div class="todo"><div><b>حصة الشهر ناقصة</b><p>ناقص ${fmt(plannedTotal-st.paid)}. لو فيه فلوس في الاحتياطي، كمّلوها.</p></div><button type="button" class="btn small" data-action="topup">كمّلها</button></div>`);
-  if(wi.unpaid.length)rows.push(`<div class="todo"><div><b>مصاريف ثابتة ما تسجّلت</b><p>${wi.unpaid.map(f=>esc((findCat(f.cat)||{name:'بند'}).name)+' '+fmt(f.amt)).join('، ')}</p></div><button type="button" class="btn small" data-action="pay-fixed">دفعناها</button></div>`);
+  const moved=r.ack?(r.moved!=null?r.moved:st.paid):st.paid, toMove=st.paid-moved;
+  if(r.ack&&toMove>0.5)rows.push(`<div class="todo"><div><b>انقلوا ${fmt(toMove)} لظرف البيت</b><p>دخلت فلوس وكمّلت حصة الشهر. خذوها من ظرف الاحتياطي.</p></div><button type="button" class="btn small" data-action="moved">تم</button></div>`);
+  if(lack>0.5&&res>0.5)rows.push(`<div class="todo"><div><b>حصة الشهر ناقصة ${fmt(lack)}</b><p>فيه ${fmt(res)} في الاحتياطي. كمّلوها منه.</p></div><button type="button" class="btn small" data-action="topup">كمّلها</button></div>`);
+  else if(lack>0.5)rows.push(`<div class="todo"><div><b>حصة الشهر ناقصة ${fmt(lack)}</b><p>تكمل لحالها أول ما يدخل فلوس. الثابتة أول، بعدها الضروري، بعدها الكمالي.</p></div></div>`);
+  const fc=fixedCoverable();
+  if(fc.ok.length)rows.push(`<div class="todo"><div><b>ادفعوا الثابتة</b><p>${fc.ok.map(f=>esc(f.name||(findCat(f.cat)||{name:'بند'}).name)+' '+fmt(f.amt)).join('، ')}</p></div><button type="button" class="btn small" data-action="pay-fixed">دفعناها</button></div>`);
+  if(fc.wait.length)rows.push(`<div class="todo"><div><b>ثابتة تنتظر</b><p>${fc.wait.map(f=>esc(f.name||(findCat(f.cat)||{name:'بند'}).name)+' '+fmt(f.amt)).join('، ')}. ما في ظرف البيت يكفيها للحين.</p></div></div>`);
+  for(const x of itemReview())rows.push(`<div class="todo"><div><b>${esc(x.c.name)}: ${x.up?'يصرف أكثر من مخصصه':'يصرف أقل من مخصصه'}</b><p>آخر 3 شهور بالمتوسط ${fmt(x.avg)}، ومخصصه ${fmt(x.c.amt)}. ${x.up?'لو الأسعار زادت ارفعوه، أو خففوا الصرف.':'نزّلوه عشان الزايد يروح للأهداف.'}</p></div><div class="todo-btns"><button type="button" class="btn small" data-action="item-adjust" data-id="${x.c.id}" data-amt="${x.to}">خلّه ${fmt(x.to)}</button><button type="button" class="btn small ghost" data-action="item-skip" data-id="${x.c.id}">لا</button></div></div>`);
   for(const x of dueNow())rows.push(`<div class="todo"><div><b>${esc(x.p.name)}</b><p>${x.n.overdue?'<span class="over">متأخر</span> · ':''}خذوا ${fmt(x.p.amt)} من الاحتياطي</p></div><button type="button" class="btn small" data-action="pay-plan" data-id="${x.p.id}" data-occ="${x.n.occ}">دفعناه</button></div>`);
   const al=goalAlloc().m;
   for(const g of S.goals)if(!g.done&&(al[g.id]||0)>=g.target)rows.push(`<div class="todo"><div><b>${esc(g.name)} جاهز</b><p>تجمّع ${fmt(g.target)} في ظرف الأهداف.</p></div><button type="button" class="btn small" data-action="goal-done" data-id="${g.id}">حققناه</button></div>`);
   return rows.length?`<section class="card"><h2>لازم تسوونه</h2>${rows.join('')}</section>`:'';
 }
+// Items whose real spending stayed well above (or below) their amount for the last 3 finished months.
+function itemReview(){
+  const ms=[1,2,3].map(k=>addMonths(S.month,-k)), have=ms.every(m=>S.tx.some(t=>t.m===m&&t.t==='close'));if(!have)return [];
+  const skip=(S.ritual[S.month]||{}).skipReview||[], out=[];
+  for(const c of allItems()){
+    if(c.fixed||!(c.amt>0)||skip.includes(c.id))continue;
+    const per=ms.map(m=>S.tx.reduce((a,t)=>a+(t.m===m&&t.t==='exp'&&t.cat===c.id&&!t.auto?t.amt:0),0));
+    const avg=per.reduce((a,b)=>a+b,0)/3, to=Math.max(10,Math.round(avg/10)*10);
+    if(per.every(v=>v>c.amt*1.1))out.push({c,avg,to,up:true});
+    else if(per.every(v=>v<c.amt*0.6))out.push({c,avg,to,up:false});
+  }
+  return out;
+}
+function incomeGap(){
+  const hist=incomeHistory();if(!(S.settings.expectedIncome>0)&&hist.n<3)return 0;
+  const need=fullShare(S)+provision().total;return Math.max(0,need-expectedIncome());
+}
 function statusLine(){
   const res=reservoir(S), fs=fullShare(S), cov=fs?res/fs:0, mode=modeFor(S,res);
+  if(fs>0&&cov<1){const need=fs-res;return `<button type="button" class="status warn" data-tab-go="money"><i></i><span>بناء الاحتياطي: يحتاج ${fmt(need)} عشان حصة الشهر الجاي تنزل كاملة</span>${ICON.chev}</button>`;}
   const cls=mode==='austerity'?'warn':'ok';
   const txt=mode==='austerity'?`ترشيد: الاحتياطي يكفي ${cov.toFixed(1)} شهر، والكماليات موقوفة`:mode==='surplus'?`الاحتياطي يكفي ${cov.toFixed(1)} شهور، والزايد يروح للأهداف`:`الاحتياطي يكفي ${cov.toFixed(1)} شهور`;
   return `<button type="button" class="status ${cls}" data-tab-go="money"><i></i><span>${txt}</span>${ICON.chev}</button>`;
@@ -941,10 +990,11 @@ function todayView(){
     <span class="lab">باقي لهالأسبوع</span>
     <span class="big num">${fmt(wi.left)}<small> د.ت</small></span>
     <div class="meter"><div style="width:${pct}%"></div></div>
-    <span class="sub">الأسبوع ${wi.cw} من 4 · ${fmt(wi.weekly)} لكل أسبوع${wi.carry>0.5?` · منها ${fmt(wi.carry)} وفر`:wi.carry<-0.5?` · بعد تجاوز ${fmt(-wi.carry)}`:''}</span>
+    <span class="sub">الأسبوع ${wi.cw} من 4 · ${fmt(wi.weekly)} لكل أسبوع${wi.carry>0.5?` · منها ${fmt(wi.carry)} وفر`:wi.carry<-0.5?` · بعد تجاوز ${fmt(-wi.carry)}`:''}${(()=>{const st=wi.st,l=sum3(st.planned)-st.paid;return l>0.5?` · الحصة ناقصة ${fmt(l)}`:''})()}</span>
   </section>
   <div class="big-actions"><button type="button" class="act exp" data-action="add-exp">${ICON.minus}<span>صرفت</span></button><button type="button" class="act inc" data-action="add-inc">${ICON.plus}<span>دخل فلوس</span></button></div>`;
   h+=statusLine();
+  {const g=incomeGap();if(g>0.5)h+=`<button type="button" class="status warn" data-tab-go="future"><i></i><span>دخلكم المعتاد أقل من اللي تحتاجونه بـ ${fmt(g)} بالشهر. خففوا بند أو أجّلوا مصروف قادم</span>${ICON.chev}</button>`;}
   h+=todos();
   const recent=S.tx.filter(t=>['exp','inc','emerg'].includes(t.t)&&!t.auto).slice(-3).reverse();
   if(recent.length)h+=`<section class="list-sec"><div class="row"><h2>آخر شي</h2><button type="button" class="link-btn" data-tab-go="money">الكل</button></div><ul class="txlist">${recent.map(t=>txRow(t,false)).join('')}</ul></section>`;
@@ -1027,7 +1077,7 @@ function futureView(){
   // upcoming expenses
   const plans=S.plans.map(p=>({p,n:planNext(p)})).filter(x=>x.n).sort((a,b)=>a.n.occ<b.n.occ?-1:1);
   h+=`<section class="card"><div class="row"><h2>مصاريف قادمة</h2><span class="small muted">من الاحتياطي</span></div>
-    ${plans.length?plans.map(({p,n})=>`<div class="fitem"><span class="fico plan">${ICON.cal}</span><div class="body"><b>${esc(p.name)}</b><span>${p.yearly?'كل سنة · ':''}${monthLabel(n.occ)} · ${n.overdue?'<span class="over">متأخر</span>':inMonths(monthsBetween(S.month,n.occ))}</span></div><span class="amt">${fmt(p.amt)}</span><button type="button" class="icon-btn" data-action="del-plan" data-id="${p.id}" aria-label="حذف">${ICON.trash}</button></div>`).join(''):'<p class="empty">مثل المدرسة، رمضان، العيد، السفرة.</p>'}
+    ${plans.length?plans.map(({p,n})=>`<div class="fitem"><span class="fico plan">${ICON.cal}</span><div class="body"><b>${esc(p.name)}</b><span>${p.yearly?(p.lunar?'كل سنة هجرية · ':'كل سنة · '):''}${monthLabel(n.occ)} · ${n.overdue?'<span class="over">متأخر</span>':inMonths(monthsBetween(S.month,n.occ))}</span></div><span class="amt">${fmt(p.amt)}</span><button type="button" class="icon-btn" data-action="del-plan" data-id="${p.id}" aria-label="حذف">${ICON.trash}</button></div>`).join(''):'<p class="empty">مثل المدرسة، رمضان، العيد، السفرة.</p>'}
   </section>`;
   // goals
   const al=goalAlloc(), pool=goalsPool(), active=S.goals.filter(g=>!g.done), done=S.goals.filter(g=>g.done);
@@ -1056,7 +1106,8 @@ function futureView(){
   let fields='';
   if(t==='plan')fields=`<div class="field"><label for="a-name">وش هو؟</label><input id="a-name" type="text" maxlength="30" placeholder="مثلاً: رسوم المدرسة"></div>
     <div class="fields"><div class="field"><label for="a-amt">المبلغ</label><input class="num" id="a-amt" type="number" inputmode="numeric" min="0"></div><div class="field"><label for="a-mm">الشهر</label><select id="a-mm">${monthOptions(ny.mm)}</select></div><div class="field"><label for="a-yy">السنة</label><select id="a-yy">${yearOptions(ny.y)}</select></div></div>
-    <label class="check"><input type="checkbox" id="a-yearly" checked> يتكرر كل سنة</label>`;
+    <label class="check"><input type="checkbox" id="a-yearly" checked> يتكرر كل سنة</label>
+    <label class="check"><input type="checkbox" id="a-lunar"> بالهجري (رمضان، العيد): يتقدّم 11 يوم كل سنة</label>`;
   else if(t==='goal')fields=`<div class="field"><label for="a-name">الهدف</label><input id="a-name" type="text" maxlength="30" placeholder="مثلاً: مقدّم سيارة"></div>
     <div class="fields"><div class="field"><label for="a-amt">المبلغ</label><input class="num" id="a-amt" type="number" inputmode="numeric" min="0"></div><div class="field"><label for="a-mm">الموعد</label><select id="a-mm"><option value="0">بدون</option>${monthOptions(0)}</select></div><div class="field"><label for="a-yy">السنة</label><select id="a-yy">${yearOptions(ny.y+1)}</select></div></div>`;
   else fields=`<div class="field"><label for="a-name">اسم الدين</label><input id="a-name" type="text" maxlength="30" placeholder="مثلاً: قرض البنك"></div>
@@ -1224,7 +1275,7 @@ $('#txForm').addEventListener('submit',e=>{
   S.tx.push(t);
   let msg=form.kind==='exp'?`تسجّل ${fmt(amt)}`:`${fmt(amt)} للاحتياطي`;
   if(form.kind==='inc'&&S.started!==false){const st=stats(S,S.month), lack=sum3(st.planned)-st.paid;
-    if(lack>0.5){const add=Math.min(lack,reservoir(S));if(add>0.5){S.tx.push({id:uid(),t:'salary',amt:add,mode:st.mode,m:S.month,d:todayDay()});msg+=`، ومنه اكتملت حصة الشهر`;}}}
+    if(lack>0.5){const add=Math.min(lack,reservoir(S));if(add>0.5){S.tx.push({id:uid(),t:'salary',amt:add,mode:st.mode,m:S.month,d:todayDay()});msg+=`، ومنه نزل ${fmt(add)} لحصة الشهر`;}}}
   save();closeSheet();render();toast(msg,()=>{const i=S.tx.indexOf(t);if(i>=0)S.tx.splice(i,1);save();rerenderKeepScroll();});
 });
 $('#f-amount').addEventListener('input',()=>{if(form.warned)resetWarn();});
@@ -1256,10 +1307,14 @@ document.addEventListener('click',e=>{
   else if(act==='add-inc')openSheet('inc');
   else if(act==='close-sheet')closeSheet();
   else if(act==='toggle-emg'){form.emg=!form.emg;form.cat=null;resetWarn();renderSheet();}
-  else if(act==='ack'){const r=S.ritual[S.month]||{};r.ack=true;S.ritual[S.month]=r;save();rerenderKeepScroll();}
-  else if(act==='topup'){const st=stats(S,S.month), amt=Math.min(sum3(st.planned)-st.paid,reservoir(S));if(amt>0){S.tx.push({id:uid(),t:'salary',amt,mode:st.mode,m:S.month,d:todayDay()});save();rerenderKeepScroll();toast(`اكتملت حصة الشهر (+${fmt(amt)})`);}}
+  else if(act==='ack'){const r=S.ritual[S.month]||{};r.ack=true;r.moved=stats(S,S.month).paid;S.ritual[S.month]=r;save();rerenderKeepScroll();}
+  else if(act==='item-adjust'){const f=findCat(id),c=f&&f.item;if(c){c.amt=Number(a.dataset.amt)||c.amt;recomputeBudgets(S);save();rerenderKeepScroll();toast(`صار ${c.name} ${fmt(c.amt)}، والحصة ${fmt(fullShare(S))}`);}}
+  else if(act==='item-skip'){const r=S.ritual[S.month]||{};r.skipReview=(r.skipReview||[]).concat(id);S.ritual[S.month]=r;save();rerenderKeepScroll();}
+  else if(act==='refresh')doRefresh(a);
+  else if(act==='moved'){const r=S.ritual[S.month]||{};r.ack=true;r.moved=stats(S,S.month).paid;S.ritual[S.month]=r;save();rerenderKeepScroll();}
+  else if(act==='topup'){const st=stats(S,S.month), amt=Math.min(sum3(st.planned)-st.paid,reservoir(S));if(amt>0){S.tx.push({id:uid(),t:'salary',amt,mode:st.mode,m:S.month,d:todayDay()});save();rerenderKeepScroll();toast(`اكتملت حصة الشهر: انقلوا ${fmt(amt)} لظرف البيت`);}}
   else if(act==='pay-fixed'){
-    const added=weekInfo().unpaid.map(f=>{const c=findCat(f.cat)||{layer:'ess',name:'مصروف ثابت'};const t={id:'fx-'+f.id+'-'+S.month,t:'exp',amt:f.amt,cat:f.cat,cname:c.name,layer:c.layer,fixedId:f.id,who:me(),note:'',m:S.month,d:1};if(f.debtId)t.debtId=f.debtId;return t;}).filter(t=>!S.tx.some(x=>x.id===t.id));
+    const added=fixedCoverable().ok.map(f=>{const c=findCat(f.cat)||{layer:'ess',name:'مصروف ثابت'};const t={id:'fx-'+f.id+'-'+S.month,t:'exp',amt:f.amt,cat:f.cat,cname:c.name,layer:c.layer,fixedId:f.id,who:me(),note:'',m:S.month,d:1};if(f.debtId)t.debtId=f.debtId;return t;}).filter(t=>!S.tx.some(x=>x.id===t.id));
     S.tx.push(...added);save();rerenderKeepScroll();const ids=new Set(added.map(t=>t.id));toast(`تسجّلت الثابتة`,()=>{S.tx=S.tx.filter(t=>!ids.has(t.id));save();rerenderKeepScroll();});
   }
   else if(act==='pay-plan'){const p=byId(S.plans,id);if(!p)return;S.tx.push({id:uid(),t:'planned',amt:p.amt,planId:p.id,pname:p.name,occ:a.dataset.occ,m:S.month,d:todayDay()});save();rerenderKeepScroll();toast(`اندفع «${p.name}» من الاحتياطي`);}
@@ -1283,7 +1338,7 @@ document.addEventListener('click',e=>{
   else if(act==='add-item'){
     const name=val('a-name').trim().slice(0,30), amt=parseAmt(val('a-amt')), err=$('#a-err');
     if(!name){err.textContent='اكتب الاسم.';return;}if(!amt){err.textContent='اكتب المبلغ.';return;}
-    if(ui.addType==='plan'){const mm=Number(val('a-mm')),yy=Number(val('a-yy')),yearly=$('#a-yearly').checked;if(!yearly&&mkey(yy,mm)<S.month){err.textContent='التاريخ فات.';return;}S.plans.push({id:'p'+uid(),name,amt,mm,yy,yearly});}
+    if(ui.addType==='plan'){const mm=Number(val('a-mm')),yy=Number(val('a-yy')),yearly=$('#a-yearly').checked,lunar=yearly&&$('#a-lunar').checked;if(!yearly&&mkey(yy,mm)<S.month){err.textContent='التاريخ فات.';return;}const pl={id:'p'+uid(),name,amt,mm,yy,yearly};if(lunar)pl.lunar=true;S.plans.push(pl);}
     else if(ui.addType==='goal'){const mm=Number(val('a-mm')),yy=Number(val('a-yy'));if(mm&&mkey(yy,mm)<=S.month){err.textContent='اختر موعد بعد هالشهر.';return;}S.goals.push({id:'g'+uid(),name,target:amt,mm:mm||null,yy:mm?yy:null,done:false});}
     else{const inst=parseAmt(val('a-inst'));if(!inst){err.textContent='اكتب القسط الشهري.';return;}const did='d'+uid();S.debts.push({id:did,name,amount:amt,inst});
       S.settings.cats.ess.push({id:'c'+uid(),name:'قسط '+name,amt:inst,fixed:true,debtId:did});}
