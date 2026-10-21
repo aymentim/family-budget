@@ -332,6 +332,14 @@ nav.tabbar{box-shadow:0 -1px 0 var(--line),0 -6px 18px rgba(25,35,55,.04);border
 .items li{display:flex;flex-direction:column;gap:4px;padding-inline-start:18px;font-size:13px}
 .items li .row{gap:8px}
 .bar.thin{height:4px}
+details.guide{border-top:1px solid var(--line)}
+details.guide>summary{list-style:none;cursor:pointer;min-height:46px;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:14px}
+details.guide>summary::-webkit-details-marker{display:none}
+details.guide>summary::after{content:"+";color:var(--accent);font-size:18px;font-weight:400}
+details.guide[open]>summary::after{content:"−"}
+.g-body{display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.7;padding-bottom:12px}
+.g-body ol{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
+.g-body .ex{background:var(--accent-soft);color:var(--accent-soft-fg);border-radius:12px;padding:8px 12px;font-size:13px}
 .week-hero{background:var(--hero);color:var(--hero-fg);border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:8px}
 .week-hero.neg{background:var(--hero-warn)}
 .week-hero .lab{font-size:14px;color:var(--hero-sub)}
@@ -1061,6 +1069,22 @@ function futureView(){
 }
 
 /* ---------- settings ---------- */
+function guideCard(){
+  const fs=fullShare(S), fx=activeFixed().reduce((a,f)=>a+f.amt,0), wk=Math.round(Math.max(0,fs-fx)/4);
+  const g=(t,b)=>`<details class="guide"><summary>${t}</summary><div class="g-body">${b}</div></details>`;
+  return `<section class="card"><h2>كيف نستخدمه</h2><p class="hint">خطوات قصيرة بأمثلة من أرقامكم.</p>
+  ${g('الفكرة في سطرين',`<p>كل دخل يروح <b>للاحتياطي</b>. ومن الاحتياطي ينزل للبيت <b>مبلغ ثابت كل شهر</b> (حصة البيت: ${fmt(fs)})، فتعيشون على رقم ثابت حتى لو الدخل متقطع.</p><p>المصروف اليومي يمشي من <b>ظرف الأسبوع</b>: حوالي ${fmt(wk)} كل أسبوع.</p>`)}
+  ${g('١. التجهيز (مرة وحدة)',`<ol><li>في <b>البنود والمبالغ</b>، اكتبوا مبلغ كل بند بالشهر. مثال: إيجار 1,200، أكل وخضرة 700.</li><li>علّموا <b>ثابت</b> على اللي يندفع كامل أول الشهر: الإيجار، الفواتير، النت.</li><li>في <b>المستقبل</b>، أضيفوا المصاريف القادمة (المدرسة، رمضان، السفرة)، والأهداف، والديون.</li><li>جهّزوا 3 أظرف: <b>البيت</b>، <b>الاحتياطي</b>، <b>الأهداف</b>. والاحتياطي الكبير خلّوه في حساب ادخار.</li></ol>`)}
+  ${g('٢. أول كل شهر (5 دقائق)',`<p>في «اليوم» تطلع بطاقة <b>بداية الشهر</b>:</p><ol><li>خذوا ${fmt(fs)} من الاحتياطي لظرف البيت.</li><li>ادفعوا الثابتة (${fmt(fx)}). تتسجل لحالها.</li><li>الباقي قسّموه على 4 أظرف صغيرة، حوالي ${fmt(wk)} لكل أسبوع.</li><li>اضغطوا <b>تم</b>.</li></ol>`)}
+  ${g('٣. كل يوم',`<p>صرفتوا؟ اضغطوا <b>صرفت</b>، اكتبوا المبلغ، اختاروا البند، حفظ.</p><p class="ex">مثال: خضرة بـ 45 ← صرفت ← 45 ← أكل وخضرة ← حفظ. الرقم الكبير ينقص لـ «باقي لهالأسبوع».</p><p>خلص ظرف الأسبوع؟ خذوا من ظرف الأسبوع الجاي، مو من الاحتياطي. والتطبيق ينبهكم لو المبلغ أكبر من الباقي.</p>`)}
+  ${g('٤. لما يجي دخل',`<p>اضغطوا <b>دخل فلوس</b> واكتبوا المبلغ، وحطوا الكاش في ظرف الاحتياطي.</p><p class="ex">مثال: عميل دفع 2,500 ← دخل فلوس ← 2,500 ← حفظ. لو حصة الشهر كانت ناقصة، تكمل منه لحالها.</p>`)}
+  ${g('٥. طارئ',`<p>للي ما ينتظر: علاج، تصليح سيارة ضروري. اضغطوا <b>صرفت</b> ثم <b>طارئ من الاحتياطي</b>.</p><p class="ex">مثال: تصليح 700 ← ينخصم من الاحتياطي، وظرف الأسبوع ما يتأثر.</p><p>الطلعات والملابس والتخفيضات مو طوارئ.</p>`)}
+  ${g('٦. مصاريف قادمة وأهداف',`<p>المصروف القادم (مثل رمضان 800) يطلع في «اليوم» لما يجي شهره، وتدفعونه من الاحتياطي.</p><p>الأهداف تتعبّى لحالها أول كل شهر من الزايد فوق سقف الاحتياطي، بالترتيب اللي حطيتوه. ولما يكتمل الهدف يطلع لكم «حققناه».</p>`)}
+  ${g('٧. آخر الشهر (دقيقتين)',`<ol><li>الباقي في الأظرف رجّعوه لظرف الاحتياطي. الشهر يتقفل لحاله.</li><li>في «الفلوس» افتحوا <b>عدّ الظروف</b> واكتبوا الكاش اللي معكم.</li></ol><p class="ex">مثال: عدّيتوا ظرف البيت 140 والتطبيق يقول 190؟ ناقص 50، يعني مصروف ما تسجّل. اضغطوا «سجّله مصروف».</p>`)}
+  ${g('٨. لو جاء شهر بدون دخل',`<p>ما تسوون شي. لما الاحتياطي ينزل تحت ${S.settings.brake} شهر، الحصة تنزل لحالها بدون الكماليات، والضروري يظل ثابت. وفي «المستقبل» تشوفون لين متى تكفيكم الفلوس.</p>`)}
+  ${g('قواعدنا',`<ol><li>كل دخل يروح للاحتياطي أول.</li><li>الاحتياطي ما ينفتح إلا لحصة الشهر، والمصاريف القادمة، والطوارئ.</li><li>مصاريف الشهر من ظرف البيت بس.</li><li>كل عملية تتسجل في نفس اليوم، من اللي صرف.</li><li>الكاش في البيت ما يتعدى حصة شهر.</li><li>كل 3 شهور راجعوا مبالغ البنود مع الصرف الفعلي.</li></ol>`)}
+  </section>`;
+}
 function settingsView(){
   const set=S.settings, a=avgSpend(S), hist=incomeHistory();
   let h=header('الإعدادات',' ');
@@ -1068,6 +1092,7 @@ function settingsView(){
     <div class="big-line"><span class="num" id="shareTotal">${fmt(fullShare(S))}</span><span class="muted">د.ت حصة البيت</span></div>
     <p class="hint">الحصة هي مجموع كل البنود. «ثابت» يتسجل لحاله أول كل شهر. ${a?`صرفكم الفعلي بالمتوسط ${fmt(a.avg)}. `:''}${hist.n>=3&&hist.avg>0?`المقترح حوالي ${fmt(Math.max(0,0.8*hist.avg-provision().total))}.`:''}</p>
     ${itemRows('st')}</section>`;
+  h+=guideCard();
   h+=`<section class="card"><h2>العائلة</h2><div class="fields two">
       <div class="field"><label for="m-0">الأول</label><input id="m-0" data-set="member" data-key="0" type="text" value="${esc(set.members[0])}"></div>
       <div class="field"><label for="m-1">الثاني</label><input id="m-1" data-set="member" data-key="1" type="text" value="${esc(set.members[1])}"></div></div>
