@@ -219,6 +219,17 @@ details.adder summary::-webkit-details-marker{display:none}
 .empty{font-size:13px;color:var(--muted);padding:4px 0}
 
 /* envelopes */
+.total{display:flex;flex-direction:column;gap:10px}
+.total .big-line .num{font-size:30px}
+.stack{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--surface-2);gap:2px}
+.stack>span{display:block;height:100%}
+.tot-rows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tot-rows div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tot-rows .lab{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tot-rows .num{font-size:15px;font-weight:600}
+.cats{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.cats li{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);padding-inline-start:18px}
+.cats li b{color:var(--fg);font-weight:500;font-family:var(--font-num)}
 .envs{background:var(--surface);border-radius:18px;padding:4px 16px;display:flex;flex-direction:column}
 .env{display:flex;gap:12px;align-items:center;padding-block:14px}
 .env+.env{border-top:1px solid var(--line)}
@@ -487,6 +498,16 @@ function weekInfo(){
   for(const t of S.tx){if(t.m!==S.month||t.t!=='exp'||fx.has(t.cat))continue;spent[weekOf(t.d)-1]+=t.amt;}
   const before=spent.slice(0,cw-1).reduce((a,b)=>a+b,0), carry=weekly*(cw-1)-before;
   return {st,weekly,spent,cw,carry,left:weekly+carry-spent[cw-1],varBudget,fixedTotal,unpaid:af.filter(f=>!fixedDone(f))};
+}
+function wealth(){const res=reservoir(S), house=houseCash(), b=buckets(S), goals=bucketsTotal(b);return {res,house,goals,b,total:res+house+goals};}
+function totalCard(){
+  const w=wealth(), parts=[['house','ظرف البيت',Math.max(0,w.house),'var(--c-house)'],['res','الاحتياطي',Math.max(0,w.res),'var(--accent)'],['goal','الأهداف',Math.max(0,w.goals),'var(--c-goal)']];
+  const sum=parts.reduce((a,x)=>a+x[2],0)||1;
+  return `<section class="card total"><div class="row"><h2>كل فلوسكم الحين</h2><button type="button" class="link-btn" data-tab-go="env">الظروف</button></div>
+    <div class="big-line"><span class="num">${fmt(w.total)}</span><span class="muted">د.ت</span></div>
+    <div class="stack" role="img" aria-label="توزيع الفلوس على الظروف">${parts.filter(x=>x[2]>0).map(x=>`<span style="width:${x[2]/sum*100}%;background:${x[3]}"></span>`).join('')}</div>
+    <div class="tot-rows">${parts.map((x,i)=>`<div><span class="lab"><i class="dot" style="background:${x[3]}"></i>${x[1]}</span><span class="num ${i===0&&w.house<0?'over':''}">${fmt(i===0?w.house:x[2])}</span></div>`).join('')}</div>
+  </section>`;
 }
 function houseCash(){const st=stats(S,S.month);return st.paid-st.spentTotal;}
 function ritual(){return S.ritual[S.month]||{};}
@@ -793,6 +814,7 @@ function homeView(){
   if(S.isSample)h+=`<div class="banner info">${ICON.info}<div><p>الأرقام هنا أمثلة عشان تجرّب. سجّل عمليات، شوف تبويب الخطة، وانتقل للشهر الجاي. تمسحها من الإعدادات.</p></div></div>`;
   h+=banner(mode,cov);
   h+=heroBlock(res,cov,mode,true);
+  h+=totalCard();
   const due=dueNow();
   if(due.length){
     h+=`<section class="card"><h2>التزامات مستحقة</h2>${due.map(x=>`<div class="row"><div><b style="font-size:14px">${esc(x.p.name)}</b><p class="small ${x.n.overdue?'over':'muted'}">${x.n.overdue?'متأخر من '+monthLabel(x.n.occ):'مستحق هذا الشهر · من الاحتياطي'}</p></div>
@@ -826,11 +848,14 @@ function homeView(){
       layers+=`<div class="locked"><span>${ICON.lock}${l.name}: مجمّد هذا الشهر</span><span class="num ${sp>0?'over':''}">${fmt(sp)} / 0</span></div>`;continue;
     }
     const w=p>0?Math.min(100,sp/p*100):(sp>0?100:0), over=sp>p;
+    const byCat={};for(const t of S.tx)if(t.m===S.month&&t.t==='exp'&&t.layer===l.id){const n=catName(t);byCat[n]=(byCat[n]||0)+t.amt;}
+    const catRows=Object.entries(byCat).filter(x=>Math.abs(x[1])>0.5).sort((a,b)=>b[1]-a[1]);
     layers+=`<div class="layer"><div class="row"><span class="lname"><i class="dot" style="background:var(--l-${l.id})"></i>${l.name}${p<base?' <span class="tag warn">مخفّض</span>':''}</span>
-      <span class="num small ${over?'over':'muted'}">${fmt(sp)} / ${fmt(p)}</span></div>
-      <div class="bar"><div style="width:${w}%;background:${over?'var(--danger)':'var(--l-'+l.id+')'}"></div></div></div>`;
+      <span class="small ${over?'over':''}">${over?`تجاوز <b class="num">${fmt(sp-p)}</b>`:`باقي <b class="num">${fmt(p-sp)}</b>`} <span class="muted num">من ${fmt(p)}</span></span></div>
+      <div class="bar"><div style="width:${w}%;background:${over?'var(--danger)':'var(--l-'+l.id+')'}"></div></div>
+      ${catRows.length?`<ul class="cats">${catRows.map(([n,v])=>`<li><span>${esc(n)}</span><b>${fmt(v)}</b></li>`).join('')}</ul>`:''}</div>`;
   }
-  h+=`<section class="card"><div class="row"><h2>الطبقات هذا الشهر</h2><button type="button" class="link-btn" data-tab-go="set">تعديل</button></div>${layers}</section>`;
+  h+=`<section class="card"><div class="row"><h2>مصروف الشهر حسب البند</h2><button type="button" class="link-btn" data-tab-go="set">تعديل</button></div>${layers}</section>`;
   const recent=S.tx.filter(t=>t.t==='exp'||t.t==='inc').slice(-4).reverse();
   h+=`<section style="display:flex;flex-direction:column;gap:8px"><div class="row" style="padding:0 4px"><h2 style="font-size:15px">آخر العمليات</h2><button type="button" class="link-btn" data-tab-go="tx">الكل</button></div>
     ${recent.length?`<ul class="txlist">${recent.map(t=>txRow(t,false)).join('')}</ul>`:`<p class="small muted" style="padding:0 4px">ما فيه عمليات بعد. اضغط + وسجّل أول مصروف أو إيراد.</p>`}</section>`;
@@ -1035,6 +1060,7 @@ function envView(){
   const plannedTotal=sum3(st.planned), hc=houseCash(), goalsTotal=bucketsTotal(b), cashCap=fs, r=ritual(), due=dueNow();
   let h=header('الظروف');
 
+  h+=`<section class="card total" style="padding-bottom:12px"><div class="row"><h2>المجموع في كل الظروف</h2><span class="num" style="font-size:22px;font-weight:600">${fmt(res+hc+goalsTotal)} <span class="muted small">د.ت</span></span></div></section>`;
   h+=`<section class="envs" aria-label="الظروف">
     <div class="env house ${hc<0?'warn':''}"><span class="ico">${ICON.home}</span><div class="body"><b>ظرف البيت</b><span>الباقي من حصة ${monthShort(S.month)}</span></div><span class="amt ${hc<0?'over':''}">${fmt(hc)}</span></div>
     <div class="env"><span class="ico">${ICON_TANK20}</span><div class="body"><b>ظرف الاحتياطي</b><span>${res>cashCap?`${fmt(cashCap)} كاش · ${fmt(res-cashCap)} في حساب الادخار`:'كله كاش في الظرف'}</span></div><span class="amt">${fmt(res)}</span></div>
